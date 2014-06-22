@@ -1,0 +1,18 @@
+{
+  "name": "retext-double-metaphone",
+  "repository": "wooorm/retext-double-metaphone",
+  "description": "Retext implementation of the Double Metaphone algorithm",
+  "version": "0.0.1",
+  "keywords": [
+    "double",
+    "metaphone",
+    "retext"
+  ],
+  "dependencies": {
+    "wooorm/double-metaphone": "~0.0.1"
+  },
+  "scripts" : [
+    "index.js"
+  ],
+  "license": "MIT"
+}

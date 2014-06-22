@@ -1,21 +1,21 @@
-# retext-metaphone [![Build Status](https://travis-ci.org/wooorm/retext-metaphone.svg?branch=master)](https://travis-ci.org/wooorm/retext-metaphone) [![Coverage Status](https://img.shields.io/coveralls/wooorm/retext-metaphone.svg)](https://coveralls.io/r/wooorm/retext-metaphone?branch=master)
+# retext-double-metaphone [![Build Status](https://travis-ci.org/wooorm/retext-double-metaphone.svg?branch=master)](https://travis-ci.org/wooorm/retext-double-metaphone) [![Coverage Status](https://img.shields.io/coveralls/wooorm/retext-double-metaphone.svg)](https://coveralls.io/r/wooorm/retext-double-metaphone?branch=master)
 
-[![browser support](https://ci.testling.com/wooorm/retext-metaphone.png) ](https://ci.testling.com/wooorm/retext-metaphone)
+[![browser support](https://ci.testling.com/wooorm/retext-double-metaphone.png) ](https://ci.testling.com/wooorm/retext-double-metaphone)
 
 ---
 
-**[Retext](https://github.com/wooorm/retext "Retext")** implementation of the [original Metaphone](http://en.wikipedia.org/wiki/Metaphone) algorithm.
+**[Retext](https://github.com/wooorm/retext "Retext")** implementation of the [Double Metaphone](http://en.wikipedia.org/wiki/metaphone) algorithm.
 
 ## Installation
 
 NPM:
 ```sh
-$ npm install retext-metaphone
+$ npm install retext-double-metaphone
 ```
 
 Component.js:
 ```sh
-$ component install wooorm/retext-metaphone
+$ component install wooorm/retext-double-metaphone
 ```
 
 ## Usage
@@ -23,20 +23,20 @@ $ component install wooorm/retext-metaphone
 ```js
 var Retext = require('retext'),
     visit = require('retext-visit'),
-    metaphone = require('retext-metaphone');
+    doubleMetaphone = require('retext-double-metaphone');
 
 var root = new Retext()
     .use(visit)
-    .use(metaphone)
+    .use(doubleMetaphone)
     .parse('A simple english sentence.');
 
 root.visitType(root.WORD_NODE, function (node) {
     console.log(node.toString(), node.data.phonetics);
 });
-// 'A', 'A'
-// 'simple', 'SMPL'
-// 'english', 'ENKLKSH'
-// 'sentence', 'SNTNS'
+// A [ 'A', 'A' ]
+// simple [ 'SMPL', 'SMPL' ]
+// english [ 'ANKLX', 'ANLX' ]
+// sentence [ 'SNTNS', 'SNTNS' ]
 ```
 
 You can also combine it with a stemmer (e.g., [retext-porter-stemmer](https://github.com/wooorm/retext-porter-stemmer))
@@ -44,21 +44,21 @@ You can also combine it with a stemmer (e.g., [retext-porter-stemmer](https://gi
 ```js
 var Retext = require('retext'),
     visit = require('retext-visit'),
-    metaphone = require('retext-metaphone'),
+    doubleMetaphone = require('retext-double-metaphone'),
     stemmer = require('retext-porter-stemmer');
 
 var root = new Retext()
     .use(visit)
-    .use(metaphone)
+    .use(doubleMetaphone)
     .use(stemmer)
     .parse('A detestable paragraph');
 
 root.visitType(root.WORD_NODE, function (node) {
     console.log(node.toString(), node.data.phonetics, node.data.stemmedPhonetics);
 });
-// 'A', 'A', 'A'
-// 'detestable', 'TTSTBL', 'TTST'
-// 'paragraph', 'PRKRF', 'PRKRF'
+// A [ 'A', 'A' ] [ 'A', 'A' ]
+// detestable [ 'TTSTPL', 'TTSTPL' ] [ 'TTST', 'TTST' ]
+// paragraph [ 'PRKRF', 'PRKRF' ] [ 'PRKRF', 'PRKRF' ]
 ```
 
 Both examples also uses [retext-visit](https://github.com/wooorm/retext-visit).

@@ -1,6 +1,6 @@
 {
   "name": "retext-double-metaphone",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Retext implementation of the Double Metaphone algorithm",
   "keywords": [
     "double",

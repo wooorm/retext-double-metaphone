@@ -17,3 +17,5 @@ function attach(retext) {
 }
 
 exports.attach = attach;
+
+exports.doubleMetaphone = doubleMetaphone;

@@ -19,6 +19,8 @@ function attach(retext) {
 
 exports.attach = attach;
 
+exports.doubleMetaphone = doubleMetaphone;
+
 },{"double-metaphone":7}],2:[function(require,module,exports){
 // http://wiki.commonjs.org/wiki/Unit_Testing/1.0
 //

@@ -2,7 +2,7 @@
   "name": "retext-double-metaphone",
   "repository": "wooorm/retext-double-metaphone",
   "description": "Retext implementation of the Double Metaphone algorithm",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "keywords": [
     "double",
     "metaphone",

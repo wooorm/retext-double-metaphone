@@ -64,7 +64,7 @@ root.visitType(root.WORD_NODE, function (node) {
 Both examples also uses [retext-visit](https://github.com/wooorm/retext-visit).
 
 ## API
-None, the plugin automatically detects the phonetics of each word when its created or changed, and stores the phonetics in `wordNode.data.phonetics`.
+None, the plugin automatically detects the phonetics of each word (using [wooorm/double-metaphone](https://github.com/wooorm/double-metaphone)) when its created or changed, and stores the phonetics in `wordNode.data.phonetics`.
 
 ## License
 

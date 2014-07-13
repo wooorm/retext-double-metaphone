@@ -9,7 +9,7 @@
     "retext"
   ],
   "dependencies": {
-    "wooorm/double-metaphone": "~0.0.1"
+    "wooorm/double-metaphone": "^0.1.0"
   },
   "scripts" : [
     "index.js"

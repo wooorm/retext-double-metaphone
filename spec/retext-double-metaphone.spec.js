@@ -49,7 +49,7 @@ describe('double-metaphone()', function () {
     it('should set each phonetics attribute to `null` when a WordNode (no ' +
         'longer?) has a value', function () {
             tree.visitType(tree.WORD_NODE, function (wordNode) {
-                wordNode.fromString();
+                wordNode[0].fromString();
                 assert(wordNode.data.phonetics === null);
             });
         }
@@ -61,7 +61,7 @@ describe('double-metaphone()', function () {
             tree.visitType(tree.WORD_NODE, function (wordNode) {
                 var phonetics;
 
-                wordNode.fromString(otherWords[++iterator]);
+                wordNode[0].fromString(otherWords[++iterator]);
 
                 phonetics = wordNode.data.phonetics;
 
@@ -82,7 +82,7 @@ describe('double-metaphone() with a stemmer', function () {
     it('should set each stemmedPhonetics attribute to `null` when a ' +
         'WordNode (no longer?) has a value', function () {
             stemmedTree.visitType(stemmedTree.WORD_NODE, function (wordNode) {
-                wordNode.fromString();
+                wordNode[0].fromString();
                 assert(wordNode.data.stemmedPhonetics === null);
             });
         }
@@ -94,7 +94,7 @@ describe('double-metaphone() with a stemmer', function () {
             stemmedTree.visitType(stemmedTree.WORD_NODE, function (wordNode) {
                 var stemmedPhonetics;
 
-                wordNode.fromString(otherWords[++iterator]);
+                wordNode[0].fromString(otherWords[++iterator]);
 
                 stemmedPhonetics = wordNode.data.stemmedPhonetics;
 

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>retext-double-metaphone</title>
+        <style>
+            label {
+                display: block;
+            }
+            fieldset {
+                border-width: 0;
+            }
+            [data-secondary-phonetics] {
+                border-bottom-width: 4px;
+                border-bottom-style: solid;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>retext-double-metaphone</h1>
+        <p>A quick demo of <a href="https://github.com/wooorm/retext-double-metaphone">retext-double-metaphone</a>.</p>
+        <p>Just paste (or write) some text in the text area below, and next to it the HTML version of the document will appear, where every word is colour coded to its phonetics (words which sound the same are coloured the same).</p>
+        <p>The Double Metaphone algorithm is different from its predecessor in that it provides two possible pronunciations. In this example the secondary phonetics (if available) are visualised using a thick underline using the colour belonging to that phonetics.</p>
+        <p>Please raise any issues on <a href="https://github.com/wooorm/retext-double-metaphone/issues">Github</a>.</p>
+        <fieldset>
+            <label for="stem">Use stemmer: <input type="checkbox" name="stem" checked /></label>
+        </fieldset>
+        <p><strong>Note!</strong> The generated colours are random (albeit generated from the phonetics): White colours might (will!) appear. Equal colours for different stems might also appear.</p>
+        <textarea rows="20" cols="80" autofocus>Try it out. Just start typing. It’s pretty cool. A simple English Anglish Anklish sentence. In a paragraph.
+
+Schmidt smit smith smithe smite!
+
+Smithereens zmithereens smutherines.</textarea>
+        <div></div>
+        <script src="build/build.js"></script>
+    </body>
+</html>

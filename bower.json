@@ -1,0 +1,31 @@
+{
+  "name": "retext-double-metaphone",
+  "main": "index.js",
+  "description": "Retext implementation of the Double Metaphone algorithm",
+  "license": "MIT",
+  "keywords": [
+    "double",
+    "metaphone",
+    "retext"
+  ],
+  "dependencies": {
+    "double-metaphone": "^0.1.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wooorm/retext-double-metaphone.git"
+  },
+  "authors": [
+    "Titus Wormer <tituswormer@gmail.com>"
+  ],
+  "ignore": [
+    ".*",
+    "*.log",
+    "*.md",
+    "component.json",
+    "package.json",
+    "coverage",
+    "node_modules",
+    "spec"
+  ]
+}

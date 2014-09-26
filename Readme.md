@@ -24,48 +24,51 @@ $ bower install retext-double-metaphone
 ```js
 var Retext = require('retext'),
     visit = require('retext-visit'),
-    doubleMetaphone = require('retext-double-metaphone');
+    doubleMetaphone = require('retext-double-metaphone'),
+    retext;
 
-var root = new Retext()
+retext = new Retext()
     .use(visit)
-    .use(doubleMetaphone)
-    .parse('A simple english sentence.');
+    .use(doubleMetaphone);
 
-root.visitType(root.WORD_NODE, function (node) {
-    console.log(node.toString(), node.data.phonetics);
+retext.parse('A simple english sentence.', function (err, tree) {
+    tree.visitType(tree.WORD_NODE, function (node) {
+        console.log(node.toString(), node.data.phonetics);
+    });
+    // 'A', [ 'A', 'A' ]
+    // 'simple', [ 'SMPL', 'SMPL' ]
+    // 'english', [ 'ANKLX', 'ANLX' ]
+    // 'sentence', [ 'SNTNS', 'SNTNS' ]
 });
-// A [ 'A', 'A' ]
-// simple [ 'SMPL', 'SMPL' ]
-// english [ 'ANKLX', 'ANLX' ]
-// sentence [ 'SNTNS', 'SNTNS' ]
 ```
 
-You can also combine it with a stemmer (e.g., [retext-porter-stemmer](https://github.com/wooorm/retext-porter-stemmer))
+You can also combine it with a stemmer (such as [retext-porter-stemmer](https://github.com/wooorm/retext-porter-stemmer), [retext-lancaster-stemmer](https://github.com/wooorm/retext-lancaster-stemmer)).
 
 ```js
 var Retext = require('retext'),
     visit = require('retext-visit'),
     doubleMetaphone = require('retext-double-metaphone'),
-    stemmer = require('retext-porter-stemmer');
+    stemmer = require('retext-porter-stemmer'),
+    retext;
 
-var root = new Retext()
+retext = new Retext()
     .use(visit)
     .use(doubleMetaphone)
-    .use(stemmer)
-    .parse('A detestable paragraph');
+    .use(stemmer);
 
-root.visitType(root.WORD_NODE, function (node) {
-    console.log(node.toString(), node.data.phonetics, node.data.stemmedPhonetics);
+retext.parse('A detestable paragraph', function (err, tree) {
+    tree.visitType(tree.WORD_NODE, function (node) {
+        console.log(node.toString(), node.data.phonetics, node.data.stemmedPhonetics);
+    });
+    // 'A', [ 'A', 'A' ], [ 'A', 'A' ]
+    // 'detestable', [ 'TTSTPL', 'TTSTPL' ], [ 'TTST', 'TTST' ]
+    // 'paragraph', [ 'PRKRF', 'PRKRF' ], [ 'PRKRF', 'PRKRF' ]
 });
-// A [ 'A', 'A' ] [ 'A', 'A' ]
-// detestable [ 'TTSTPL', 'TTSTPL' ] [ 'TTST', 'TTST' ]
-// paragraph [ 'PRKRF', 'PRKRF' ] [ 'PRKRF', 'PRKRF' ]
 ```
 
-Both examples also uses [retext-visit](https://github.com/wooorm/retext-visit).
-
 ## API
-None, the plugin automatically detects the phonetics of each word (using [wooorm/double-metaphone](https://github.com/wooorm/double-metaphone)) when its created or changed, and stores the phonetics in `wordNode.data.phonetics`.
+
+None, the plugin automatically detects the phonetics of each word (using [wooorm/double-metaphone](https://github.com/wooorm/double-metaphone)) when it’s created or changed, and stores the phonetics in `wordNode.data.phonetics`.
 
 ## License
 

@@ -18,6 +18,7 @@
     "jscs": "^1.6.0",
     "mocha": "^1.20.0",
     "retext": "^0.2.0-rc.2",
+    "retext-content": "^0.2.2",
     "retext-porter-stemmer": "^0.1.1",
     "retext-visit": "^0.1.1"
   },

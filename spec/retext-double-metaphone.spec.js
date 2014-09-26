@@ -1,26 +1,54 @@
 'use strict';
 
-var doubleMetaphone, stemmer, visit, Retext, assert,
-    tree, stemmedTree, otherWords, otherPhonetics, stemmedOtherPhonetics;
+/**
+ * Dependencies.
+ */
+
+var doubleMetaphone,
+    content,
+    stemmer,
+    visit,
+    Retext,
+    assert;
 
 doubleMetaphone = require('..');
 Retext = require('retext');
 visit = require('retext-visit');
+content = require('retext-content');
 stemmer = require('retext-porter-stemmer');
 assert = require('assert');
 
-tree = new Retext()
-    .use(visit)
-    .use(doubleMetaphone)
-    .parse('A simple, english, sentence');
+/**
+ * Retext.
+ */
 
-stemmedTree = new Retext()
+var retext,
+    retextWithStemmer;
+
+retext = new Retext()
+    .use(doubleMetaphone)
     .use(visit)
+    .use(content);
+
+retextWithStemmer = new Retext()
     .use(doubleMetaphone)
     .use(stemmer)
-    .parse(tree.toString());
+    .use(visit)
+    .use(content);
 
-otherWords = ['A', 'detestable', 'vile', 'paragraph'];
+/**
+ * Fixtures.
+ */
+
+var sentence,
+    words,
+    otherPhonetics,
+    stemmedOtherPhonetics;
+
+sentence = 'A simple, English, sentence.';
+
+words = ['A', 'detestable', 'vile', 'paragraph'];
+
 otherPhonetics = [
     ['A', 'A'],
     ['TTSTPL', 'TTSTPL'],
@@ -35,76 +63,109 @@ stemmedOtherPhonetics = [
     ['PRKRF', 'PRKRF']
 ];
 
+/**
+ * Tests.
+ */
+
 describe('double-metaphone()', function () {
-    it('should be of type `function`', function () {
+    it('should be a `function`', function () {
         assert(typeof doubleMetaphone === 'function');
     });
 
-    it('should process each `WordNode`', function () {
-        tree.visitType(tree.WORD_NODE, function (wordNode) {
-            assert('phonetics' in wordNode.data);
+    retext.parse(sentence, function (err, tree) {
+        it('should not throw', function (done) {
+            done(err);
         });
+
+        it('should process each `WordNode`', function () {
+            tree.visitType(tree.WORD_NODE, function (node) {
+                assert('phonetics' in node.data);
+            });
+        });
+
+        it('should set `phonetics` to `null` when `WordNode` (no ' +
+            'longer?) has a value',
+            function () {
+                tree.visitType(tree.WORD_NODE, function (node) {
+                    node.removeContent();
+
+                    assert(node.data.phonetics === null);
+                });
+            }
+        );
+
+        it('should re-process `WordNode`s when their value changes',
+            function () {
+                var index;
+
+                index = -1;
+
+                tree.visitType(tree.WORD_NODE, function (node) {
+                    var phonetics;
+
+                    index++;
+
+                    node.replaceContent(words[index]);
+
+                    phonetics = node.data.phonetics;
+
+                    assert(phonetics[0] === otherPhonetics[index][0]);
+                    assert(phonetics[1] === otherPhonetics[index][1]);
+                });
+            }
+        );
     });
-
-    it('should set each phonetics attribute to `null` when a WordNode (no ' +
-        'longer?) has a value', function () {
-            tree.visitType(tree.WORD_NODE, function (wordNode) {
-                wordNode[0].fromString();
-                assert(wordNode.data.phonetics === null);
-            });
-        }
-    );
-
-    it('should automatically reprocess `WordNode`s when their values change',
-        function () {
-            var iterator = -1;
-            tree.visitType(tree.WORD_NODE, function (wordNode) {
-                var phonetics;
-
-                wordNode[0].fromString(otherWords[++iterator]);
-
-                phonetics = wordNode.data.phonetics;
-
-                assert(phonetics[0] === otherPhonetics[iterator][0]);
-                assert(phonetics[1] === otherPhonetics[iterator][1]);
-            });
-        }
-    );
 });
 
 describe('double-metaphone() with a stemmer', function () {
-    it('should process stem in each `WordNode` if available', function () {
-        stemmedTree.visitType(stemmedTree.WORD_NODE, function (wordNode) {
-            assert('stemmedPhonetics' in wordNode.data);
+    retextWithStemmer.parse(sentence, function (err, tree) {
+        it('should not throw', function (done) {
+            done(err);
         });
+
+        it('should process `stem` in each `WordNode`', function () {
+            tree.visitType(tree.WORD_NODE, function (node) {
+                assert('stemmedPhonetics' in node.data);
+            });
+        });
+
+        it('should set `stemmedPhonetics` to `null` when `WordNode` (no ' +
+            'longer?) has a value',
+            function () {
+                tree.visitType(tree.WORD_NODE, function (node) {
+                    node.removeContent();
+
+                    assert(node.data.stemmedPhonetics === null);
+                });
+            }
+        );
+
+        it('should re-process `WordNode`s when their stem changes',
+            function () {
+                var index;
+
+                index = -1;
+
+                tree.visitType(tree.WORD_NODE, function (node) {
+                    var stemmedPhonetics;
+
+                    index++;
+
+                    node.replaceContent(words[index]);
+
+                    stemmedPhonetics = node.data.stemmedPhonetics;
+
+                    assert(
+                        stemmedPhonetics[0] ===
+                        stemmedOtherPhonetics[index][0]
+                    );
+
+                    assert(
+                        stemmedPhonetics[1] ===
+                        stemmedOtherPhonetics[index][1]
+                    );
+                });
+            }
+        );
     });
-
-    it('should set each stemmedPhonetics attribute to `null` when a ' +
-        'WordNode (no longer?) has a value', function () {
-            stemmedTree.visitType(stemmedTree.WORD_NODE, function (wordNode) {
-                wordNode[0].fromString();
-                assert(wordNode.data.stemmedPhonetics === null);
-            });
-        }
-    );
-
-    it('should automatically reprocess `WordNode`s stemmed phonetics when ' +
-        'their values change', function () {
-            var iterator = -1;
-            stemmedTree.visitType(stemmedTree.WORD_NODE, function (wordNode) {
-                var stemmedPhonetics;
-
-                wordNode[0].fromString(otherWords[++iterator]);
-
-                stemmedPhonetics = wordNode.data.stemmedPhonetics;
-
-                assert(
-                    stemmedPhonetics[0] === stemmedOtherPhonetics[iterator][0]
-                );
-                assert(
-                    stemmedPhonetics[1] === stemmedOtherPhonetics[iterator][1]
-                );
-            });
-        }
-    );
 });

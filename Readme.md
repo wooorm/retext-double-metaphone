@@ -4,14 +4,19 @@
 
 ## Installation
 
-NPM:
+npm:
 ```sh
 $ npm install retext-double-metaphone
 ```
 
-Component.js:
+Component:
 ```sh
 $ component install wooorm/retext-double-metaphone
+```
+
+Bower:
+```sh
+$ bower install retext-double-metaphone
 ```
 
 ## Usage

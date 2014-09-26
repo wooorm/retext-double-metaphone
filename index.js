@@ -1,24 +1,61 @@
 'use strict';
 
-exports = module.exports = function () {};
+/**
+ * Dependencies.
+ */
 
-var doubleMetaphone = require('double-metaphone');
+var phonetics;
+
+phonetics = require('double-metaphone');
+
+/**
+ * Define `doubleMetaphone`.
+ */
+
+function doubleMetaphone() {}
+
+/**
+ * Change handler.
+ *
+ * @this {WordNode}
+ */
 
 function onchange() {
-    var data = this.data,
-        value = this.toString();
+    var data,
+        value;
 
-    data.phonetics = value ? doubleMetaphone(value) : null;
+    data = this.data;
+    value = this.toString();
+
+    data.phonetics = value ? phonetics(value) : null;
 
     if ('stem' in data) {
-        data.stemmedPhonetics = value ? doubleMetaphone(data.stem) : null;
+        data.stemmedPhonetics = value ? phonetics(data.stem) : null;
     }
 }
 
+/**
+ * Define `attach`.
+ *
+ * @param {Retext} retext
+ */
+
 function attach(retext) {
-    retext.parser.TextOM.WordNode.on('changetextinside', onchange);
-    retext.parser.TextOM.WordNode.on('removeinside', onchange);
-    retext.parser.TextOM.WordNode.on('insertinside', onchange);
+    var WordNode = retext.TextOM.WordNode;
+
+    WordNode.on('changetextinside', onchange);
+    WordNode.on('removeinside', onchange);
+    WordNode.on('insertinside', onchange);
 }
 
-exports.attach = attach;
+/**
+ * Expose `attach`.
+ */
+
+doubleMetaphone.attach = attach;
+
+/**
+ * Expose `doubleMetaphone`.
+ */
+
+module.exports = doubleMetaphone;

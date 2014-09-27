@@ -52,24 +52,130 @@ require.define = function (name, exports) {
     exports: exports
   };
 };
-require.register("wooorm~double-metaphone@0.1.0", function (exports, module) {
+require.register("wooorm~double-metaphone@0.1.1", function (exports, module) {
 'use strict';
 
-var VOWELS = /[AEIOUY]/,
-    SLAVO_GERMANIC = /W|K|CZ|WITZ/,
-    GERMANIC = /^(VAN |VON |SCH)/,
-    INITIAL_EXCEPTIONS = /^(GN|KN|PN|WR|PS)/,
-    GREEK_INITIAL_CH = /^CH(IA|EM|OR([^E])|YM|ARAC|ARIS)/,
-    GREEK_CH = /ORCHES|ARCHIT|ORCHID/,
-    CH_FOR_KH = /[ BFHLMNRVW]/,
-    G_FOR_F = /[CGLRT]/,
-    INITIAL_G_FOR_KJ = /Y[\s\S]|E[BILPRSY]|I[BELN]/,
-    INITIAL_ANGER_EXCEPTION = /^[DMR]ANGER/,
-    G_FOR_KJ = /[EGIR]/,
-    J_FOR_J_EXCEPTION = /[LTKSNMBZ]/,
-    ALLE = /[AO]S/,
-    H_FOR_S = /EIM|OEK|OLM|OLZ/,
-    DUTCH_SCH = /E[DMNR]|UY|OO/;
+var VOWELS,
+    SLAVO_GERMANIC,
+    GERMANIC,
+    INITIAL_EXCEPTIONS,
+    GREEK_INITIAL_CH,
+    GREEK_CH,
+    CH_FOR_KH,
+    G_FOR_F,
+    INITIAL_G_FOR_KJ,
+    INITIAL_ANGER_EXCEPTION,
+    G_FOR_KJ,
+    J_FOR_J_EXCEPTION,
+    ALLE,
+    H_FOR_S,
+    DUTCH_SCH;
+
+/**
+ * Match vowels (including `Y`).
+ */
+
+VOWELS = /[AEIOUY]/;
+
+/**
+ * Match few Slavo-Germanic values.
+ */
+
+SLAVO_GERMANIC = /W|K|CZ|WITZ/;
+
+/**
+ * Match few Germanic values.
+ */
+
+GERMANIC = /^(VAN |VON |SCH)/;
+
+/**
+ * Match initial values of which the first character
+ * should be skipped.
+ */
+
+INITIAL_EXCEPTIONS = /^(GN|KN|PN|WR|PS)/;
+
+/**
+ * Match initial Greek-like values of which the `CH`
+ * sounds like `K`.
+ */
+
+GREEK_INITIAL_CH = /^CH(IA|EM|OR([^E])|YM|ARAC|ARIS)/;
+
+/**
+ * Match Greek-like values of which the `CH` sounds
+ * like `K`.
+ */
+
+GREEK_CH = /ORCHES|ARCHIT|ORCHID/;
+
+/**
+ * Match values which when following `CH`, transform `CH`
+ * to sound like `K`.
+ */
+
+CH_FOR_KH = /[ BFHLMNRVW]/;
+
+/**
+ * Match values which when preceding a vowel and `UGH`,
+ * sound like `F`.
+ */
+
+G_FOR_F = /[CGLRT]/;
+
+/**
+ * Match initial values which sound like either `K` or `J`.
+ */
+
+INITIAL_G_FOR_KJ = /Y[\s\S]|E[BILPRSY]|I[BELN]/;
+
+/**
+ * Match initial values which sound like either `K` or `J`.
+ */
+
+INITIAL_ANGER_EXCEPTION = /^[DMR]ANGER/;
+
+/**
+ * Match values which when following `GY`, do not sound
+ * like `K` or `J`.
+ */
+
+G_FOR_KJ = /[EGIR]/;
+
+/**
+ * Match values which when following `J`, do not sound `J`.
+ */
+
+J_FOR_J_EXCEPTION = /[LTKSNMBZ]/;
+
+/**
+ * Match values which might sound like `L`.
+ */
+
+ALLE = /AS|OS/;
+
+/**
+ * Match Germanic values preceding `SH` which sound
+ * like `S`.
+ */
+
+H_FOR_S = /EIM|OEK|OLM|OLZ/;
+
+/**
+ * Match Dutch values following `SCH` which sound like
+ * either `X` and `SK`, or `SK`.
+ */
+
+DUTCH_SCH = /E[DMNR]|UY|OO/;
+
+/**
+ * Get the phonetics according to the Double Metaphone
+ * algorithm from a value.
+ *
+ * @param {string} value - value to detect phonetics for.
+ * @return {string} phonetics.
+ */
 
 function doubleMetaphone(value) {
     var primary = '',
@@ -85,12 +191,18 @@ function doubleMetaphone(value) {
     isGermanic = GERMANIC.test(value);
     characters = value.split('');
 
-    /* skip this at beginning of word */
+    /**
+     * skip this at beginning of word.
+     */
+
     if (INITIAL_EXCEPTIONS.test(value)) {
         index++;
     }
 
-    /* Initial X is pronounced Z, which maps to S. (E.g. 'Xavier') */
+    /**
+     * Initial X is pronounced Z, which maps to S. Such as `Xavier`
+     */
+
     if (characters[0] === 'X') {
         primary += 'S';
         secondary += 'S';
@@ -115,7 +227,10 @@ function doubleMetaphone(value) {
             case 'É':
             case 'É':
                 if (index === 0) {
-                    // all initial vowels now map to 'A'
+                    /**
+                     * All initial vowels now map to `A`.
+                     */
+
                     primary += 'A';
                     secondary += 'A';
                 }
@@ -141,7 +256,10 @@ function doubleMetaphone(value) {
 
                 break;
             case 'C':
-                /* Various Germanic: */
+                /**
+                 * Various Germanic:
+                 */
+
                 if (prev === 'A' && next === 'H' && nextnext !== 'I' &&
                     !VOWELS.test(characters[index - 2]) &&
                     (
@@ -158,7 +276,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                /* special case for 'caesar' */
+                /**
+                 * Special case for `Caesar`.
+                 */
+
                 if (
                     index === 0 &&
                     value.slice(index + 1, index + 6) === 'AESAR'
@@ -170,7 +291,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // italian 'chianti'
+                /**
+                 * Italian `Chianti`.
+                 */
+
                 if (value.slice(index + 1, index + 4) === 'HIA') {
                     primary += 'K';
                     secondary += 'K';
@@ -180,7 +304,10 @@ function doubleMetaphone(value) {
                 }
 
                 if (next === 'H') {
-                    // find 'michael'
+                    /**
+                     * Find `Michael`.
+                     */
+
                     if (
                         index > 0 && nextnext === 'A' &&
                         characters[index + 3] === 'E'
@@ -192,7 +319,10 @@ function doubleMetaphone(value) {
                         break;
                     }
 
-                    // greek roots e.g. 'chemistry', 'chorus'
+                    /**
+                     * Greek roots such as `chemistry`, `chorus`.
+                     */
+
                     if (index === 0 && GREEK_INITIAL_CH.test(value)) {
                         primary += 'K';
                         secondary += 'K';
@@ -201,10 +331,16 @@ function doubleMetaphone(value) {
                         break;
                     }
 
-                    // Germanic, Greek, or otherwise 'ch' for 'kh' sound
+                    /**
+                     * Germanic, Greek, or otherwise `CH` for `KH` sound.
+                     */
+
                     if (
                         isGermanic ||
-                        // 'architect' but not 'arch', orchestra', 'orchid'
+                        /**
+                         * Such as 'architect' but not 'arch', orchestra',
+                         * 'orchid'.
+                         */
                         GREEK_CH.test(value.slice(index - 2, index + 4)) ||
                         (nextnext === 'T' || nextnext === 'S') ||
                         (
@@ -213,7 +349,10 @@ function doubleMetaphone(value) {
                                 prev === 'A' || prev === 'E' ||
                                 prev === 'O' || prev === 'U'
                             ) &&
-                            // e.g. 'wachtler', 'weschsler', but not 'tichner'
+                            /**
+                             * Such as `wachtler`, `weschsler`, but not
+                             * `tichner`.
+                             */
                             CH_FOR_KH.test(nextnext)
                         )
                     ) {
@@ -222,9 +361,14 @@ function doubleMetaphone(value) {
                     } else if (index === 0) {
                         primary += 'X';
                         secondary += 'X';
+                    /**
+                     * Such as 'McHugh'.
+                     */
                     } else if (value.slice(0, 2) === 'MC') {
-                        // Bug? Why matching absolute? what about McHiccup?
-                        // e.g. 'McHugh'
+                        /**
+                         * Bug? Why matching absolute? what about McHiccup?
+                         */
+
                         primary += 'K';
                         secondary += 'K';
                     } else {
@@ -237,7 +381,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // e.g. 'czerny'
+                /**
+                 * Such as `Czerny`.
+                 */
+
                 if (
                     next === 'Z' &&
                     value.slice(index - 2, index) !== 'WI'
@@ -249,7 +396,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // e.g. 'focaccia'
+                /**
+                 * Such as `Focaccia`.
+                 */
+
                 if (value.slice(index + 1, index + 4) === 'CIA') {
                     primary += 'X';
                     secondary += 'X';
@@ -258,12 +408,18 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // double 'C', but not McClellan'
+                /**
+                 * Double `C`, but not `McClellan`.
+                 */
+
                 if (
                     next === 'C' &&
                     !(index === 1 && characters[0] === 'M')
                 ) {
-                    // 'bellocchio' but not 'bacchus'
+                    /**
+                     * Such as `Bellocchio`, but not `Bacchus`.
+                     */
+
                     if (
                         (
                             nextnext === 'I' ||
@@ -274,14 +430,20 @@ function doubleMetaphone(value) {
                     ) {
                         subvalue = value.slice(index - 1, index + 4);
 
-                        // 'accident', 'accede', 'succeed'
+                        /**
+                         * Such as `Accident`, `Accede`, `Succeed`.
+                         */
+
                         if (
                             (index === 1 && prev === 'A') ||
                             subvalue === 'UCCEE' || subvalue === 'UCCES'
                         ) {
                             primary += 'KS';
                             secondary += 'KS';
-                            // 'bacci', 'bertucci', other italian
+
+                        /**
+                         * Such as `Bacci`, `Bertucci`, other Italian.
+                         */
                         } else {
                             primary += 'X';
                             secondary += 'X';
@@ -291,7 +453,10 @@ function doubleMetaphone(value) {
 
                         break;
                     } else {
-                        // Pierce's rule
+                        /**
+                         * Pierce's rule.
+                         */
+
                         primary += 'K';
                         secondary += 'K';
                         index += 2;
@@ -308,11 +473,16 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // italian
+                /**
+                 * Italian.
+                 */
+
                 if (
                     next === 'I' &&
-                    // Bug: The original algorithm also calls for A (as
-                    // in CIA), which is already taken care of above.
+                    /**
+                     * Bug: The original algorithm also calls for A (as
+                     * in CIA), which is already taken care of above.
+                     */
                     (nextnext === 'E' || nextnext === 'O')
                 ) {
                     primary += 'S';
@@ -330,12 +500,14 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // else
                 primary += 'K';
                 secondary += 'K';
 
-                // Skip two extra characters ahead in 'mac caffrey',
-                // 'mac gregor'
+                /**
+                 * Skip two extra characters ahead in `Mac Caffrey`,
+                 * `Mac Gregor`.
+                 */
+
                 if (
                     next === ' ' &&
                     (
@@ -348,35 +520,43 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // Bug: Already covered above.
-                // if (
-                //     next === 'K' ||
-                //     next === 'Q' ||
-                //     (
-                //         next === 'C' &&
-                //         nextnext !== 'E' &&
-                //         nextnext !== 'I'
-                //     )
-                // ) {
-                //     index++;
-                // }
+                /**
+                 * Bug: Already covered above.
+                 *
+                 * if (
+                 *     next === 'K' ||
+                 *     next === 'Q' ||
+                 *     (
+                 *         next === 'C' &&
+                 *         nextnext !== 'E' &&
+                 *         nextnext !== 'I'
+                 *     )
+                 * ) {
+                 *     index++;
+                 * }
+                 */
 
                 index++;
 
                 break;
             case 'D':
                 if (next === 'G') {
+                    /**
+                     * Such as `edge`.
+                     */
+
                     if (
                         nextnext === 'E' ||
                         nextnext === 'I' ||
                         nextnext === 'Y'
                     ) {
-                        // e.g. 'edge'
                         primary += 'J';
                         secondary += 'J';
                         index += 3;
+                    /**
+                     * Such as `Edgar`.
+                     */
                     } else {
-                        // e.g. 'edgar'
                         primary += 'TK';
                         secondary += 'TK';
                         index += 2;
@@ -418,7 +598,10 @@ function doubleMetaphone(value) {
                         break;
                     }
 
-                    // 'ghislane', 'ghiradelli'
+                    /**
+                     * Such as `Ghislane`, `Ghiradelli`.
+                     */
+
                     if (index === 0) {
                         if (nextnext === 'I') {
                             primary += 'J';
@@ -431,27 +614,42 @@ function doubleMetaphone(value) {
                         break;
                     }
 
-                    // Parker's rule (with some further refinements)
+                    /**
+                     * Parker's rule (with some further refinements).
+                     */
+
                     if (
-                        // e.g. 'hugh'
                         (
-                            // The comma is not a bug.
+                            /**
+                             * Such as `Hugh`
+                             *
+                             * The comma is not a bug.
+                             */
+
                             subvalue = characters[index - 2],
                             subvalue === 'B' ||
                             subvalue === 'H' ||
                             subvalue === 'D'
                         ) ||
-                        // e.g. 'bough'
                         (
-                            // The comma is not a bug.
+                            /**
+                             * Such as `bough`.
+                             *
+                             * The comma is not a bug.
+                             */
+
                             subvalue = characters[index - 3],
                             subvalue === 'B' ||
                             subvalue === 'H' ||
                             subvalue === 'D'
                         ) ||
-                        // e.g. 'broughton'
                         (
-                            // The comma is not a bug.
+                            /**
+                             * Such as `Broughton`.
+                             *
+                             * The comma is not a bug.
+                             */
+
                             subvalue = characters[index - 4],
                             subvalue === 'B' ||
                             subvalue === 'H'
@@ -462,8 +660,11 @@ function doubleMetaphone(value) {
                         break;
                     }
 
-                    // e.g. 'laugh', 'McLaughlin', 'cough', 'gough', 'rough',
-                    // 'tough'
+                    /**
+                     * Such as `laugh`, `McLaughlin`, `cough`, `gough`,
+                     * `rough`, `tough`.
+                     */
+
                     if (
                         index > 2 && prev === 'U' &&
                         G_FOR_F.test(characters[index - 3])
@@ -488,7 +689,9 @@ function doubleMetaphone(value) {
                     ) {
                         primary += 'KN';
                         secondary += 'N';
-                    // not e.g. 'cagney'
+                    /**
+                     * Not like `Cagney`.
+                     */
                     } else if (
                         value.slice(index + 2, index + 4) !== 'EY' &&
                         value.slice(index + 1) !== 'Y' &&
@@ -506,7 +709,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // 'tagliaro'
+                /**
+                 * Such as `Tagliaro`.
+                 */
+
                 if (
                     value.slice(index + 1, index + 3) === 'LI' &&
                     !isSlavoGermanic
@@ -518,7 +724,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // -ges-, -gep-, -gel- at beginning
+                /**
+                 * -ges-, -gep-, -gel- at beginning.
+                 */
+
                 if (
                     index === 0 &&
                     INITIAL_G_FOR_KJ.test(value.slice(1, 3))
@@ -530,7 +739,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // -ger-, -gy-
+                /**
+                 * -ger-, -gy-.
+                 */
+
                 if (
                     (
                         value.slice(index + 1, index + 3) === 'ER' &&
@@ -546,7 +758,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // italian e.g. 'biaggi'
+                /**
+                 * Italian such as `biaggi`.
+                 */
+
                 if (
                     next === 'E' || next === 'I' || next === 'Y' ||
                     (
@@ -554,7 +769,10 @@ function doubleMetaphone(value) {
                         next === 'G' && nextnext === 'I'
                     )
                 ) {
-                    // obvious germanic
+                    /**
+                     * Obvious Germanic.
+                     */
+
                     if (
                         value.slice(index + 1, index + 3) === 'ET' ||
                         isGermanic
@@ -562,7 +780,10 @@ function doubleMetaphone(value) {
                         primary += 'K';
                         secondary += 'K';
                     } else {
-                        // always soft if french ending
+                        /**
+                         * Always soft if French ending.
+                         */
+
                         if (value.slice(index + 1, index + 5) === 'IER ') {
                             primary += 'J';
                             secondary += 'J';
@@ -588,7 +809,10 @@ function doubleMetaphone(value) {
 
                 break;
             case 'H':
-                // only keep if first & before vowel or btw. 2 vowels
+                /**
+                 * Only keep if first & before vowel or btw. 2 vowels.
+                 */
+
                 if (VOWELS.test(next) && (index === 0 || VOWELS.test(prev))) {
                     primary += 'H';
                     secondary += 'H';
@@ -600,7 +824,9 @@ function doubleMetaphone(value) {
 
                 break;
             case 'J':
-                // obvious spanish, 'jose', 'san jacinto'
+                /**
+                 * Obvious Spanish, `jose`, `San Jacinto`.
+                 */
                 if (
                     value.slice(index, index + 4) === 'JOSE' ||
                     value.slice(0, 4) === 'SAN '
@@ -626,12 +852,21 @@ function doubleMetaphone(value) {
 
                 if (
                     index === 0
-                    // Bug: unreachable (see previous statement).
-                    // && value.slice(index, index + 4) !== 'JOSE'
+                    /**
+                     * Bug: unreachable (see previous statement).
+                     * && value.slice(index, index + 4) !== 'JOSE'.
+                     */
                 ) {
-                    primary += 'J'; // Yankelovich/Jankelowicz
+                    primary += 'J';
+
+                    /**
+                     * Such as `Yankelovich` or `Jankelowicz`.
+                     */
+
                     secondary += 'A';
-                // spanish pron. of e.g. 'bajador'
+                /**
+                 * Spanish pron. of such as `bajador`.
+                 */
                 } else if (
                     !isSlavoGermanic &&
                     (next === 'A' || next === 'O') &&
@@ -641,14 +876,15 @@ function doubleMetaphone(value) {
                     secondary += 'H';
                 } else if (index === last) {
                     primary += 'J';
-                    // Note: Not a bug, just dropping secondary.
                 } else if (
                     prev !== 'S' && prev !== 'K' && prev !== 'L' &&
                     !J_FOR_J_EXCEPTION.test(next)
                 ) {
                     primary += 'J';
                     secondary += 'J';
-                // it could happen
+                /**
+                 * It could happen.
+                 */
                 } else if (next === 'J') {
                     index++;
                 }
@@ -668,7 +904,10 @@ function doubleMetaphone(value) {
                 break;
             case 'L':
                 if (next === 'L') {
-                    // spanish e.g. 'cabrillo', 'gallegos'
+                    /**
+                     * Spanish such as `cabrillo`, `gallegos`.
+                     */
+
                     if (
                         (
                             index === length - 3 &&
@@ -694,7 +933,6 @@ function doubleMetaphone(value) {
                         )
                     ) {
                         primary += 'L';
-                        // secondary += '';
                         index += 2;
 
                         break;
@@ -711,8 +949,12 @@ function doubleMetaphone(value) {
             case 'M':
                 if (
                     next === 'M' ||
+
+                    /**
+                     * Such as `dumb`, `thumb`.
+                     */
+
                     (
-                        // 'dumb', 'thumb'
                         prev === 'U' && next === 'B' &&
                         (
                             index + 1 === last ||
@@ -753,7 +995,10 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // also account for "campbell" and "raspberry"
+                /**
+                 * Also account for `campbell` and `raspberry`.
+                 */
+
                 subvalue = next;
 
                 if (subvalue === 'P' || subvalue === 'B') {
@@ -777,7 +1022,10 @@ function doubleMetaphone(value) {
 
                 break;
             case 'R':
-                // french e.g. 'rogier', but exclude 'hochmeier'
+                /**
+                 * French such as `Rogier`, but exclude `Hochmeier`.
+                 */
+
                 if (
                     index === last &&
                     !isSlavoGermanic &&
@@ -789,7 +1037,6 @@ function doubleMetaphone(value) {
                         characters[index - 3] !== 'A'
                     )
                 ) {
-                    // primary += '';
                     secondary += 'R';
                 } else {
                     primary += 'R';
@@ -804,14 +1051,20 @@ function doubleMetaphone(value) {
 
                 break;
             case 'S':
-                // special cases 'island', 'isle', 'carlisle', 'carlysle'
+                /**
+                 * Special cases `island`, `isle`, `carlisle`, `carlysle`.
+                 */
+
                 if (next === 'L' && (prev === 'I' || prev === 'Y')) {
                     index++;
 
                     break;
                 }
 
-                // special case 'sugar-'
+                /**
+                 * Special case `sugar-`.
+                 */
+
                 if (index === 0 && value.slice(1, 5) === 'UGAR') {
                     primary += 'X';
                     secondary += 'S';
@@ -821,7 +1074,10 @@ function doubleMetaphone(value) {
                 }
 
                 if (next === 'H') {
-                    // germanic
+                    /**
+                     * Germanic.
+                     */
+
                     if (H_FOR_S.test(value.slice(index + 1, index + 5))) {
                         primary += 'S';
                         secondary += 'S';
@@ -836,8 +1092,10 @@ function doubleMetaphone(value) {
 
                 if (
                     next === 'I' && (nextnext === 'O' || nextnext === 'A')
-                    // Bug: Already covered by previous branch
-                    // || value.slice(index, index + 4) === 'SIAN'
+                    /**
+                     * Bug: Already covered by previous branch
+                     * || value.slice(index, index + 4) === 'SIAN'
+                     */
                 ) {
                     if (!isSlavoGermanic) {
                         primary += 'S';
@@ -852,9 +1110,12 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // german & anglicisations, e.g. 'smith' match 'schmidt',
-                // 'snider' match 'schneider'. Also, -sz- in slavic language
-                // altho in hungarian it is pronounced 's'
+                /**
+                 * German & Anglicization's, such as `Smith` match `Schmidt`,
+                 * `snider` match `Schneider`. Also, -sz- in slavic language
+                 * although in hungarian it is pronounced `s`.
+                 */
+
                 if (
                     next === 'Z' ||
                     (
@@ -877,13 +1138,22 @@ function doubleMetaphone(value) {
                 }
 
                 if (next === 'C') {
-                    // Schlesinger's rule
+                    /**
+                     * Schlesinger's rule.
+                     */
+
                     if (nextnext === 'H') {
                         subvalue = value.slice(index + 3, index + 5);
 
-                        // dutch origin, e.g. 'school', 'schooner'
+                        /**
+                         * Dutch origin, such as `school`, `schooner`.
+                         */
+
                         if (DUTCH_SCH.test(subvalue)) {
-                            // 'schermerhorn', 'schenker'
+                            /**
+                             * Such as `schermerhorn`, `schenker`.
+                             */
+
                             if (subvalue === 'ER' || subvalue === 'EN') {
                                 primary += 'X';
                                 secondary += 'SK';
@@ -934,7 +1204,10 @@ function doubleMetaphone(value) {
 
                 subvalue = value.slice(index - 2, index);
 
-                // french e.g. 'resnais', 'artois'
+                /**
+                 * French such as `resnais`, `artois`.
+                 */
+
                 if (
                     index === last &&
                     (
@@ -942,7 +1215,6 @@ function doubleMetaphone(value) {
                         subvalue === 'OI'
                     )
                 ) {
-                    // primary += '';
                     secondary += 'S';
                 } else {
                     primary += 'S';
@@ -951,9 +1223,12 @@ function doubleMetaphone(value) {
 
                 if (
                     next === 'S'
-                    // Bug: already taken care of by "german & anglicisations"
-                    // above:
-                    // || next === 'Z'
+                    /**
+                     * Bug: already taken care of by `German &
+                     * Anglicization's` above:
+                     *
+                     * || next === 'Z'
+                     */
                 ) {
                     index++;
                 }
@@ -993,7 +1268,10 @@ function doubleMetaphone(value) {
                 }
 
                 if (next === 'H' || (next === 'T' && nextnext === 'H')) {
-                    // special case 'thomas', 'thames' or germanic
+                    /**
+                     * Special case `Thomas`, `Thames` or Germanic.
+                     */
+
                     if (
                         isGermanic ||
                         (
@@ -1033,8 +1311,11 @@ function doubleMetaphone(value) {
 
                 break;
             case 'W':
-                // Can also be in middle of word (as already taken care of
-                // for initial).
+                /**
+                 * Can also be in middle of word (as already taken care of
+                 * for initial).
+                 */
+
                 if (next === 'R') {
                     primary += 'R';
                     secondary += 'R';
@@ -1044,18 +1325,27 @@ function doubleMetaphone(value) {
                 }
 
                 if (index === 0) {
-                    // Wasserman should match Vasserman
+                    /**
+                     * `Wasserman` should match `Vasserman`.
+                     */
+
                     if (VOWELS.test(next)) {
                         primary += 'A';
                         secondary += 'F';
                     } else if (next === 'H') {
-                        // need Uomo to match Womo
+                        /**
+                         * Need `Uomo` to match `Womo`.
+                         */
+
                         primary += 'A';
                         secondary += 'A';
                     }
                 }
 
-                // Arnow should match Arnoff
+                /**
+                 * `Arnow` should match `Arnoff`.
+                 */
+
                 if (
                     (
                         (prev === 'E' || prev === 'O') &&
@@ -1065,18 +1355,23 @@ function doubleMetaphone(value) {
                             characters[index + 3] === 'Y'
                         )
                     ) ||
-                    // Maybe a bug? Shouldnt this be general Germanic?
+                    /**
+                     * Maybe a bug? Shouldn't this be general Germanic?
+                     */
+
                     value.slice(0, 3) === 'SCH' ||
                     (index === last && VOWELS.test(prev))
                 ) {
-                    // primary += '';
                     secondary += 'F';
                     index++;
 
                     break;
                 }
 
-                // polish e.g. 'filipowicz'
+                /**
+                 * Polish such as `Filipowicz`.
+                 */
+
                 if (
                     next === 'I' &&
                     (nextnext === 'C' || nextnext === 'T') &&
@@ -1089,17 +1384,21 @@ function doubleMetaphone(value) {
                     break;
                 }
 
-                // else skip it
                 index++;
 
                 break;
             case 'X':
-                // french e.g. breaux
+                /**
+                 * French such as `breaux`.
+                 */
+
                 if (
                     index === last ||
                     (
-                        // Bug: IAU and EAU also match by AU
-                        // /IAU|EAU/.test(value.slice(index - 3, index)) ||
+                        /**
+                         * Bug: IAU and EAU also match by AU
+                         * /IAU|EAU/.test(value.slice(index - 3, index)) ||
+                         */
                         prev === 'U' &&
                         (
                             characters[index - 2] === 'A' ||
@@ -1119,7 +1418,10 @@ function doubleMetaphone(value) {
 
                 break;
             case 'Z':
-                // chinese pinyin e.g. 'zhao'
+                /**
+                 * Chinese pinyin such as `Zhao`.
+                 */
+
                 if (next === 'H') {
                     primary += 'J';
                     secondary += 'J';
@@ -1159,39 +1461,80 @@ function doubleMetaphone(value) {
     return [primary, secondary];
 }
 
+/**
+ * Expose `doubleMetaphone`.
+ */
+
 module.exports = doubleMetaphone;
 
 });
 
-require.register("wooorm~retext-double-metaphone@0.1.0", function (exports, module) {
+require.register("wooorm~retext-double-metaphone@0.1.1", function (exports, module) {
 'use strict';
 
-exports = module.exports = function () {};
+/**
+ * Dependencies.
+ */
 
-var doubleMetaphone = require("wooorm~double-metaphone@0.1.0");
+var phonetics;
+
+phonetics = require("wooorm~double-metaphone@0.1.1");
+
+/**
+ * Define `doubleMetaphone`.
+ */
+
+function doubleMetaphone() {}
+
+/**
+ * Change handler.
+ *
+ * @this {WordNode}
+ */
 
 function onchange() {
-    var data = this.data,
-        value = this.toString();
+    var data,
+        value;
 
-    data.phonetics = value ? doubleMetaphone(value) : null;
+    data = this.data;
+    value = this.toString();
+
+    data.phonetics = value ? phonetics(value) : null;
 
     if ('stem' in data) {
-        data.stemmedPhonetics = value ? doubleMetaphone(data.stem) : null;
+        data.stemmedPhonetics = value ? phonetics(data.stem) : null;
     }
 }
 
+/**
+ * Define `attach`.
+ *
+ * @param {Retext} retext
+ */
+
 function attach(retext) {
-    retext.parser.TextOM.WordNode.on('changetextinside', onchange);
-    retext.parser.TextOM.WordNode.on('removeinside', onchange);
-    retext.parser.TextOM.WordNode.on('insertinside', onchange);
+    var WordNode = retext.TextOM.WordNode;
+
+    WordNode.on('changetextinside', onchange);
+    WordNode.on('removeinside', onchange);
+    WordNode.on('insertinside', onchange);
 }
 
-exports.attach = attach;
+/**
+ * Expose `attach`.
+ */
+
+doubleMetaphone.attach = attach;
+
+/**
+ * Expose `doubleMetaphone`.
+ */
+
+module.exports = doubleMetaphone;
 
 });
 
-require.register("wooorm~parse-latin@0.1.1", function (exports, module) {
+require.register("wooorm~parse-latin@0.1.3", function (exports, module) {
 /**!
  * parse-latin
  *
@@ -1201,8 +1544,11 @@ require.register("wooorm~parse-latin@0.1.1", function (exports, module) {
 'use strict';
 
 var EXPRESSION_ABBREVIATION_PREFIX, EXPRESSION_NEW_LINE,
+    EXPRESSION_MULTI_NEW_LINE,
     EXPRESSION_AFFIX_PUNCTUATION, EXPRESSION_INNER_WORD_PUNCTUATION,
+    EXPRESSION_INITIAL_WORD_PUNCTUATION, EXPRESSION_FINAL_WORD_PUNCTUATION,
     EXPRESSION_LOWER_INITIAL_EXCEPTION,
+    EXPRESSION_NUMERICAL, EXPRESSION_TERMINAL_MARKER,
     GROUP_ALPHABETIC, GROUP_ASTRAL, GROUP_CLOSING_PUNCTUATION,
     GROUP_COMBINING_DIACRITICAL_MARK, GROUP_COMBINING_NONSPACING_MARK,
     GROUP_FINAL_PUNCTUATION, GROUP_LETTER_LOWER, GROUP_NUMERICAL,
@@ -1457,11 +1803,17 @@ GROUP_ASTRAL = expand('D800-DBFFDC00-DFFF');
 /**
  * Expose interrobang, question-, and exclamation mark.
  *
+ * - Full stop;
+ * - Interrobang;
+ * - Question mark;
+ * - Exclamation mark;
+ * - Horizontal ellipsis.
+ *
  * @global
  * @private
  * @constant
  */
-GROUP_TERMINAL_MARKER = '\\.\\u203D?!';
+GROUP_TERMINAL_MARKER = '\\.\\u203D?!\\u2026';
 
 /**
  * Expose Unicode Pe (Punctuation, Close) category.
@@ -1536,6 +1888,7 @@ EXPRESSION_AFFIX_PUNCTUATION = new RegExp(
         GROUP_CLOSING_PUNCTUATION +
         GROUP_FINAL_PUNCTUATION +
         GROUP_TERMINAL_MARKER +
+        '"\'' +
     '])\\1*$'
 );
 
@@ -1549,26 +1902,91 @@ EXPRESSION_AFFIX_PUNCTUATION = new RegExp(
 EXPRESSION_NEW_LINE = /^(\r?\n|\r)+$/;
 
 /**
- * Matches punctuation which can be used to join two (sub?) words together.
+ * Matches a string consisting of two or more new line characters.
+ *
+ * @global
+ * @private
+ * @constant
+ */
+EXPRESSION_MULTI_NEW_LINE = /^(\r?\n|\r){2,}$/;
+
+/**
+ * Matches a sentence terminal marker, one or more of the following:
+ *
+ * - Full stop;
+ * - Interrobang;
+ * - Question mark;
+ * - Exclamation mark;
+ * - Horizontal ellipsis.
+ *
+ * @global
+ * @private
+ * @constant
+ */
+EXPRESSION_TERMINAL_MARKER = new RegExp(
+    '^([' + GROUP_TERMINAL_MARKER + ']+)$'
+);
+
+/**
+ * Matches punctuation part of the surrounding words.
  *
  * Includes:
  * - Hyphen-minus;
+ * - At sign;
+ * - Question mark;
+ * - Equals sign;
  * - full-stop;
  * - colon;
  * - Dumb single quote;
  * - Right single quote;
+ * - Ampersand;
  * - Soft hyphen;
  * - Hyphen;
  * - Non-breaking hyphen;
  * - Hyphenation point;
- * - Middle dot
+ * - Middle dot;
+ * - Slash (one or more);
+ * - Underscore (one or more).
  *
  * @global
  * @private
  * @constant
  */
 EXPRESSION_INNER_WORD_PUNCTUATION =
-    /^[-.:'\/\u2019\u00AD\u00B7\u2010\2011\u2027]$/;
+    /^([-@?=.:'\u2019&\u00AD\u00B7\u2010\2011\u2027]|[_\/]+)$/;
+
+/**
+ * Matches punctuation part of the next word.
+ *
+ * Includes:
+ * - Ampersand;
+ *
+ * @global
+ * @private
+ * @constant
+ */
+EXPRESSION_INITIAL_WORD_PUNCTUATION = /^&$/;
+
+/**
+ * Matches punctuation part of the previous word.
+ *
+ * Includes:
+ * - Hyphen-minus.
+ *
+ * @global
+ * @private
+ * @constant
+ */
+EXPRESSION_FINAL_WORD_PUNCTUATION = /^-$/;
+
+/**
+ * Matches a number.
+ *
+ * @global
+ * @private
+ * @constant
+ */
+EXPRESSION_NUMERICAL = new RegExp('^[' + GROUP_NUMERICAL + ']+$');
 
 /**
  * Matches an initial lower case letter.
@@ -1717,6 +2135,93 @@ function tokenizerFactory(context, options) {
 }
 
 /**
+ * Merges certain punctuation marks into their previous words.
+ *
+ * @param {Object} child
+ * @param {number} index
+ * @param {Object} parent
+ * @return {undefined|number} - Either void, or the next index to iterate
+ *     over.
+ *
+ * @global
+ * @private
+ */
+function mergeInitialWordPunctuation(child, index, parent) {
+    var children, next, hasPreviousWord, hasNextWord;
+
+    if (
+        child.type !== 'PunctuationNode' ||
+        !EXPRESSION_INITIAL_WORD_PUNCTUATION.test(tokenToString(child))
+    ) {
+        return;
+    }
+
+    children = parent.children;
+    next = children[index + 1];
+
+    hasPreviousWord = index !== 0 && children[index - 1].type === 'WordNode';
+    hasNextWord = next && next.type === 'WordNode';
+
+    if (hasPreviousWord || !hasNextWord) {
+        return;
+    }
+
+    /* Remove `child` from parent. */
+    children.splice(index, 1);
+
+    /* Add the punctuation mark at the start of the next node. */
+    next.children.unshift(child);
+
+    /* Next, iterate over the node at the previous position. */
+    return index - 1;
+}
+
+/**
+ * Merges certain punctuation marks into their preceding words.
+ *
+ * @param {Object} child
+ * @param {number} index
+ * @param {Object} parent
+ * @return {undefined|number} - Either void, or the next index to iterate
+ *     over.
+ *
+ * @global
+ * @private
+ */
+function mergeFinalWordPunctuation(child, index, parent) {
+    var children, prev, next;
+
+    if (
+        index === 0 ||
+        child.type !== 'PunctuationNode' ||
+        !EXPRESSION_FINAL_WORD_PUNCTUATION.test(tokenToString(child))
+    ) {
+        return;
+    }
+
+    children = parent.children;
+    prev = children[index - 1];
+    next = children[index + 1];
+
+    if (
+        (next && next.type === 'WordNode') ||
+        !(prev && prev.type === 'WordNode')
+    ) {
+        return;
+    }
+
+    /* Remove `child` from parent. */
+    children.splice(index, 1);
+
+    /* Add the punctuation mark at the end of the previous node. */
+    prev.children.push(child);
+
+    /* Next, iterate over the node *now* at the current position (which was
+     * the next node). */
+    return index;
+}
+
+/**
  * Merges two words surrounding certain punctuation marks.
  *
  * @param {Object} child
@@ -1729,7 +2234,8 @@ function tokenizerFactory(context, options) {
  * @private
  */
 function mergeInnerWordPunctuation(child, index, parent) {
-    var children, prev, next;
+    var children, prev, otherChild,
+        iterator, tokens, queue;
 
     if (index === 0 || child.type !== 'PunctuationNode') {
         return;
@@ -1737,46 +2243,59 @@ function mergeInnerWordPunctuation(child, index, parent) {
 
     children = parent.children;
     prev = children[index - 1];
-    next = children[index + 1];
 
-    if (
-        prev.type !== 'WordNode' || !next ||
-        (
-            next.type !== 'WordNode' &&
-            next.type !== 'PunctuationNode'
-        )
-    ) {
+    if (!prev || prev.type !== 'WordNode') {
         return;
     }
 
-    if (!EXPRESSION_INNER_WORD_PUNCTUATION.test(child.children[0].value)) {
-        return;
-    }
+    iterator = index - 1;
+    tokens = [];
+    queue = [];
 
-    /* e.g., C.I.A{.}\'s, where in curly brackets the child is depicted. */
-    if (next.type === 'PunctuationNode') {
-        if (
-            child.children[0].value !== '.' ||
-            !EXPRESSION_INNER_WORD_PUNCTUATION.test(next.children[0].value)
-        ) {
-            return;
+    /*
+     * - Is a token which is neither word nor inner word punctuation is
+     *   found, the loop is broken.
+     * - If a inner word punctuation mark is found, it's queued.
+     * - If a word is found, it's queued (and the queue stored and emptied).
+     */
+    while (children[++iterator]) {
+        otherChild = children[iterator];
+
+        if (otherChild.type === 'WordNode') {
+            tokens = tokens.concat(queue, otherChild.children);
+            queue = [];
+            continue;
         }
 
-        /* Remove `child` from parent. */
-        children.splice(index, 1);
+        if (
+            otherChild.type === 'PunctuationNode' &&
+            EXPRESSION_INNER_WORD_PUNCTUATION.test(tokenToString(otherChild))
+        ) {
+            queue.push(otherChild);
+            continue;
+        }
 
-        /* Add `child` to the previous children. */
-        prev.children.push(child);
-
-        return index - 1;
+        break;
     }
 
-    /* Remove `child` and `next` from parent. */
-    children.splice(index, 2);
+    /* If no tokens were found, exit. */
+    if (!tokens.length) {
+        return;
+    }
 
-    prev.children = prev.children.concat(child, next.children);
+    /* If there was a queue found, remove its length from iterator. */
+    if (queue.length) {
+        iterator -= queue.length;
+    }
 
-    return index - 1;
+    /* Remove every (one or more) inner-word punctuation marks, and children
+     * of words. */
+    children.splice(index, iterator - index);
+
+    /* Add all found tokens to prev.children */
+    prev.children = prev.children.concat(tokens);
+
+    return index;
 }
 
 /**
@@ -1792,11 +2311,11 @@ function mergeInnerWordPunctuation(child, index, parent) {
  * @private
  */
 function mergeInitialisms(child, index, parent) {
-    var prev, children, length, iterator;
+    var prev, children, length, iterator, otherChild, isAllDigits, value;
 
     if (
         index === 0 || child.type !== 'PunctuationNode' ||
-        child.children[0].value !== '.'
+        tokenToString(child) !== '.'
     ) {
         return;
     }
@@ -1817,22 +2336,27 @@ function mergeInitialisms(child, index, parent) {
     }
 
     iterator = length;
+    isAllDigits = true;
 
     while (children[--iterator]) {
+        otherChild = children[iterator];
+        value = tokenToString(otherChild);
+
         if (iterator % 2 === 0) {
             /* istanbul ignore if: TOSPEC: Currently not spec-able, but
              * future-friendly */
-            if (children[iterator].type !== 'TextNode') {
+            if (otherChild.type !== 'TextNode') {
                 return;
             }
 
-            if (children[iterator].value.length > 1) {
+            if (value.length > 1) {
                 return;
             }
-        } else if (
-            children[iterator].type !== 'PunctuationNode' ||
-            children[iterator].children[0].value !== '.'
-        ) {
+
+            if (!EXPRESSION_NUMERICAL.test(value)) {
+                isAllDigits = false;
+            }
+        } else if (otherChild.type !== 'PunctuationNode' || value !== '.') {
             /* istanbul ignore else: TOSPEC */
             if (iterator < length - 2) {
                 break;
@@ -1840,6 +2364,10 @@ function mergeInitialisms(child, index, parent) {
                 return;
             }
         }
+    }
+
+    if (isAllDigits) {
+        return;
     }
 
     /* Remove `child` from parent. */
@@ -1878,7 +2406,7 @@ function mergePrefixExceptions(child, index, parent) {
 
     if (
         !node || node.type !== 'PunctuationNode' ||
-        node.children[0].value !== '.'
+        tokenToString(node) !== '.'
     ) {
         return;
     }
@@ -1888,7 +2416,7 @@ function mergePrefixExceptions(child, index, parent) {
     if (!node ||
         node.type !== 'WordNode' ||
         !EXPRESSION_ABBREVIATION_PREFIX.test(
-            node.children[0].value.toLowerCase()
+            tokenToString(node).toLowerCase()
         )
     ) {
         return;
@@ -1941,7 +2469,7 @@ function mergeAffixExceptions(child, index, parent) {
     if (
         !node ||
         node.type !== 'PunctuationNode' ||
-        node.children[0].value !== ','
+        !(tokenToString(node) === ',' || tokenToString(node) === ';')
     ) {
         return;
     }
@@ -2018,6 +2546,129 @@ function makeFinalWhiteSpaceAndSourceSiblings(child, index, parent) {
 }
 
 /**
+ * Merges non-terminal marker full stops into, if available, the previous
+ * word, or if available, the next word.
+ *
+ * @param {Object} child
+ * @param {number} index
+ * @return {undefined}
+ *
+ * @global
+ * @private
+ */
+function mergeRemainingFullStops(child, index) {
+    var children = child.children,
+        iterator = children.length,
+        grandchild, prev, next, hasFoundDelimiter;
+
+    hasFoundDelimiter = false;
+
+    while (children[--iterator]) {
+        grandchild = children[iterator];
+
+        if (grandchild.type !== 'PunctuationNode') {
+            /* This is a sentence without terminal marker, so we 'fool' the
+             * code to make it think we have found one. */
+            if (grandchild.type === 'WordNode') {
+                hasFoundDelimiter = true;
+            }
+            continue;
+        }
+
+        /* Exit when this token is not a terminal marker. */
+        if (!EXPRESSION_TERMINAL_MARKER.test(tokenToString(grandchild))) {
+            continue;
+        }
+
+        /* Exit when this is the first terminal marker found (starting at the
+         * end), so it should not be merged. */
+        if (!hasFoundDelimiter) {
+            hasFoundDelimiter = true;
+            continue;
+        }
+
+        /* Only merge a single full stop. */
+        if (tokenToString(grandchild) !== '.') {
+            continue;
+        }
+
+        prev = children[iterator - 1];
+        next = children[iterator + 1];
+
+        if (prev && prev.type === 'WordNode') {
+            /* Exit when the full stop is followed by a space and another,
+             * full stop, such as: `{.} .` */
+            if (
+                next && next.type === 'WhiteSpaceNode' &&
+                children[iterator + 2] &&
+                children[iterator + 2].type === 'PunctuationNode' &&
+                tokenToString(children[iterator + 2]) === '.'
+            ) {
+                continue;
+            }
+
+            /* Remove `child` from parent. */
+            children.splice(iterator, 1);
+
+            /* Add the punctuation mark at the end of the previous node. */
+            prev.children.push(grandchild);
+
+            iterator--;
+        } else if (next && next.type === 'WordNode') {
+            /* Remove `child` from parent. */
+            children.splice(iterator, 1);
+
+            /* Add the punctuation mark at the start of the next node. */
+            next.children.unshift(grandchild);
+        }
+    }
+}
+
+/**
+ * Breaks a sentence if a node containing two or more white spaces is found.
+ *
+ * @param {Object} child
+ * @param {number} index
+ * @param {Object} parent
+ * @return {undefined|number} - Either void, or the next index to iterate
+ *     over.
+ *
+ * @global
+ * @private
+ */
+function breakImplicitSentences(child, index, parent) {
+    if (child.type !== 'SentenceNode') {
+        return;
+    }
+
+    var children = child.children,
+        iterator = -1,
+        length = children.length,
+        node;
+
+    while (++iterator < length) {
+        node = children[iterator];
+
+        if (node.type !== 'WhiteSpaceNode') {
+            continue;
+        }
+
+        if (!EXPRESSION_MULTI_NEW_LINE.test(tokenToString(node))) {
+            continue;
+        }
+
+        child.children = children.slice(0, iterator);
+
+        parent.children.splice(index + 1, 0, node, {
+            'type' : 'SentenceNode',
+            'children' : children.slice(iterator + 1)
+        });
+
+        return index + 2;
+    }
+}
+
+/**
  * Merges a sentence into its previous sentence, when the sentence starts
  * with a lower case letter.
  *
@@ -2048,9 +2699,7 @@ function mergeInitialLowerCaseLetterSentences(child, index, parent) {
             return;
         } else if (node.type === 'WordNode') {
             if (
-                !EXPRESSION_LOWER_INITIAL_EXCEPTION.test(
-                    node.children[0].value
-                )
+                !EXPRESSION_LOWER_INITIAL_EXCEPTION.test(tokenToString(node))
             ) {
                 return;
             }
@@ -2135,7 +2784,7 @@ function mergeSourceLines(child, index, parent) {
     if (
         !child ||
         child.type !== 'WhiteSpaceNode' ||
-        !EXPRESSION_NEW_LINE.test(child.children[0].value)
+        !EXPRESSION_NEW_LINE.test(tokenToString(child))
     ) {
         return;
     }
@@ -2153,7 +2802,7 @@ function mergeSourceLines(child, index, parent) {
 
         if (
             sibling.type === 'WhiteSpaceNode' &&
-            EXPRESSION_NEW_LINE.test(sibling.children[0].value)
+            EXPRESSION_NEW_LINE.test(tokenToString(sibling))
         ) {
             break;
         }
@@ -2195,7 +2844,7 @@ function mergeAffixPunctuation(child, index, parent) {
 
     if (
         children[0].type !== 'PunctuationNode' ||
-        !EXPRESSION_AFFIX_PUNCTUATION.test(children[0].children[0].value)
+        !EXPRESSION_AFFIX_PUNCTUATION.test(tokenToString(children[0]))
     ) {
         return;
     }
@@ -2222,6 +2871,46 @@ function removeEmptyNodes(child, index, parent) {
         parent.children.splice(index, 1);
         return index > 0 ? index - 1 : 0;
     }
+}
+
+/**
+ * Returns a function which in turn returns nodes of the given type.
+ *
+ * @param {string} type
+ * @return {Function} - A function which creates nodes of the given type.
+ * @global
+ * @private
+ */
+function createNodeFactory(type) {
+    return function (value) {
+        return {
+            'type' : type,
+            'children' : [
+                this.tokenizeText(value)
+            ]
+        };
+    };
+}
+
+/**
+ * Returns a function which in turn returns text nodes of the given type.
+ *
+ * @param {string} type
+ * @return {Function} - A function which creates text nodes of the given type.
+ * @global
+ * @private
+ */
+function createTextNodeFactory(type) {
+    return function (value) {
+        if (value === null || value === undefined) {
+            value = '';
+        }
+
+        return {
+            'type' : type,
+            'value' : String(value)
+        };
+    };
 }
 
 /**
@@ -2358,31 +3047,77 @@ parseLatinPrototype.classifier = function (value) {
      * space.
      */
     if (this.EXPRESSION_WHITE_SPACE.test(value)) {
-        type = 'WhiteSpaceNode';
+        type = 'WhiteSpace';
     /*
      * Otherwise, if the token contains just word characters, classify it as
      * a word.
      */
     } else if (this.EXPRESSION_WORD.test(value)) {
-        type = 'WordNode';
+        type = 'Word';
     /*
      * Otherwise, classify it as punctuation.
      */
     } else {
-        type = 'PunctuationNode';
+        type = 'Punctuation';
     }
 
     /* Return a token. */
-    return {
-        'type' : type,
-        'children' : [
-            {
-                'type' : 'TextNode',
-                'value' : value
-            }
-        ]
-    };
+    return this['tokenize' + type](value);
 };
+
+/**
+ * Returns a source node, with its value set to the given value.
+ *
+ * @param {string} value
+ * @return {Object} - The SourceNode.
+ * @private
+ * @memberof ParseLatin#
+ */
+parseLatinPrototype.tokenizeSource = createTextNodeFactory('SourceNode');
+
+/**
+ * Returns a text node, with its value set to the given value.
+ *
+ * @param {string} value
+ * @return {Object} - The TextNode.
+ * @private
+ * @memberof ParseLatin#
+ */
+parseLatinPrototype.tokenizeText = createTextNodeFactory('TextNode');
+
+/**
+ * Returns a word node, with its children set to a single text node, its
+ * value set to the given value.
+ *
+ * @param {string} value
+ * @return {Object} - The WordNode.
+ * @private
+ * @memberof ParseLatin#
+ */
+parseLatinPrototype.tokenizeWord = createNodeFactory('WordNode');
+
+/**
+ * Returns a white space node, with its children set to a single text node,
+ * its value set to the given value.
+ *
+ * @param {string} value
+ * @return {Object} - The whiteSpaceNode.
+ * @private
+ * @memberof ParseLatin#
+ */
+parseLatinPrototype.tokenizeWhiteSpace = createNodeFactory('WhiteSpaceNode');
+
+/**
+ * Returns a punctuation node, with its children set to a single text node,
+ * its value set to the given value.
+ *
+ * @param {string} value
+ * @return {Object} - The PunctuationNode.
+ * @private
+ * @memberof ParseLatin#
+ */
+parseLatinPrototype.tokenizePunctuation =
+    createNodeFactory('PunctuationNode');
 
 /**
  * Tokenize natural Latin-script language into a sentence token.
@@ -2409,6 +3144,8 @@ parseLatinPrototype.tokenizeSentence = function (value) {
 };
 
 parseLatinPrototype.tokenizeSentenceModifiers = [
+    mergeInitialWordPunctuation,
+    mergeFinalWordPunctuation,
     mergeInnerWordPunctuation,
     mergeSourceLines,
     mergeInitialisms
@@ -2427,15 +3164,17 @@ parseLatinPrototype.tokenizeParagraph = tokenizerFactory(ParseLatin, {
     'name' : 'tokenizeParagraph',
     'tokenizer' : 'tokenizeSentence',
     'type' : 'ParagraphNode',
-    'delimiter' : new RegExp('^([' + GROUP_TERMINAL_MARKER + ']+)$'),
+    'delimiter' : EXPRESSION_TERMINAL_MARKER,
     'modifiers' : [
-        mergePrefixExceptions,
-        mergeAffixExceptions,
         mergeNonWordSentences,
         mergeAffixPunctuation,
         mergeInitialLowerCaseLetterSentences,
+        mergePrefixExceptions,
+        mergeAffixExceptions,
+        mergeRemainingFullStops,
         makeInitialWhiteSpaceAndSourceSiblings,
         makeFinalWhiteSpaceAndSourceSiblings,
+        breakImplicitSentences,
         removeEmptyNodes
     ]
 });
@@ -3551,35 +4290,568 @@ module.exports = TextOMConstructor;
 
 });
 
-require.register("wooorm~retext@0.1.1", function (exports, module) {
-'use strict';
+require.register("visionmedia~co@3.1.0", function (exports, module) {
 
-var TextOMConstructor = require("wooorm~textom@0.1.1"),
-    ParseLatin = require("wooorm~parse-latin@0.1.1");
+/**
+ * slice() reference.
+ */
 
-function fromAST(TextOM, ast) {
-    var iterator = -1,
-        children, node, data, attribute;
+var slice = Array.prototype.slice;
 
-    node = new TextOM[ast.type]();
+/**
+ * Expose `co`.
+ */
 
-    if ('children' in ast) {
-        iterator = -1;
-        children = ast.children;
+module.exports = co;
 
-        while (children[++iterator]) {
-            node.append(fromAST(TextOM, children[iterator]));
-        }
+/**
+ * Wrap the given generator `fn` and
+ * return a thunk.
+ *
+ * @param {Function} fn
+ * @return {Function}
+ * @api public
+ */
+
+function co(fn) {
+  var isGenFun = isGeneratorFunction(fn);
+
+  return function (done) {
+    var ctx = this;
+
+    // in toThunk() below we invoke co()
+    // with a generator, so optimize for
+    // this case
+    var gen = fn;
+
+    // we only need to parse the arguments
+    // if gen is a generator function.
+    if (isGenFun) {
+      var args = slice.call(arguments), len = args.length;
+      var hasCallback = len && 'function' == typeof args[len - 1];
+      done = hasCallback ? args.pop() : error;
+      gen = fn.apply(this, args);
     } else {
-        node.fromString(ast.value);
+      done = done || error;
     }
 
+    next();
+
+    // #92
+    // wrap the callback in a setImmediate
+    // so that any of its errors aren't caught by `co`
+    function exit(err, res) {
+      setImmediate(function(){
+        done.call(ctx, err, res);
+      });
+    }
+
+    function next(err, res) {
+      var ret;
+
+      // multiple args
+      if (arguments.length > 2) res = slice.call(arguments, 1);
+
+      // error
+      if (err) {
+        try {
+          ret = gen.throw(err);
+        } catch (e) {
+          return exit(e);
+        }
+      }
+
+      // ok
+      if (!err) {
+        try {
+          ret = gen.next(res);
+        } catch (e) {
+          return exit(e);
+        }
+      }
+
+      // done
+      if (ret.done) return exit(null, ret.value);
+
+      // normalize
+      ret.value = toThunk(ret.value, ctx);
+
+      // run
+      if ('function' == typeof ret.value) {
+        var called = false;
+        try {
+          ret.value.call(ctx, function(){
+            if (called) return;
+            called = true;
+            next.apply(ctx, arguments);
+          });
+        } catch (e) {
+          setImmediate(function(){
+            if (called) return;
+            called = true;
+            next(e);
+          });
+        }
+        return;
+      }
+
+      // invalid
+      next(new TypeError('You may only yield a function, promise, generator, array, or object, '
+        + 'but the following was passed: "' + String(ret.value) + '"'));
+    }
+  }
+}
+
+/**
+ * Convert `obj` into a normalized thunk.
+ *
+ * @param {Mixed} obj
+ * @param {Mixed} ctx
+ * @return {Function}
+ * @api private
+ */
+
+function toThunk(obj, ctx) {
+
+  if (isGeneratorFunction(obj)) {
+    return co(obj.call(ctx));
+  }
+
+  if (isGenerator(obj)) {
+    return co(obj);
+  }
+
+  if (isPromise(obj)) {
+    return promiseToThunk(obj);
+  }
+
+  if ('function' == typeof obj) {
+    return obj;
+  }
+
+  if (isObject(obj) || Array.isArray(obj)) {
+    return objectToThunk.call(ctx, obj);
+  }
+
+  return obj;
+}
+
+/**
+ * Convert an object of yieldables to a thunk.
+ *
+ * @param {Object} obj
+ * @return {Function}
+ * @api private
+ */
+
+function objectToThunk(obj){
+  var ctx = this;
+  var isArray = Array.isArray(obj);
+
+  return function(done){
+    var keys = Object.keys(obj);
+    var pending = keys.length;
+    var results = isArray
+      ? new Array(pending) // predefine the array length
+      : new obj.constructor();
+    var finished;
+
+    if (!pending) {
+      setImmediate(function(){
+        done(null, results)
+      });
+      return;
+    }
+
+    // prepopulate object keys to preserve key ordering
+    if (!isArray) {
+      for (var i = 0; i < pending; i++) {
+        results[keys[i]] = undefined;
+      }
+    }
+
+    for (var i = 0; i < keys.length; i++) {
+      run(obj[keys[i]], keys[i]);
+    }
+
+    function run(fn, key) {
+      if (finished) return;
+      try {
+        fn = toThunk(fn, ctx);
+
+        if ('function' != typeof fn) {
+          results[key] = fn;
+          return --pending || done(null, results);
+        }
+
+        fn.call(ctx, function(err, res){
+          if (finished) return;
+
+          if (err) {
+            finished = true;
+            return done(err);
+          }
+
+          results[key] = res;
+          --pending || done(null, results);
+        });
+      } catch (err) {
+        finished = true;
+        done(err);
+      }
+    }
+  }
+}
+
+/**
+ * Convert `promise` to a thunk.
+ *
+ * @param {Object} promise
+ * @return {Function}
+ * @api private
+ */
+
+function promiseToThunk(promise) {
+  return function(fn){
+    promise.then(function(res) {
+      fn(null, res);
+    }, fn);
+  }
+}
+
+/**
+ * Check if `obj` is a promise.
+ *
+ * @param {Object} obj
+ * @return {Boolean}
+ * @api private
+ */
+
+function isPromise(obj) {
+  return obj && 'function' == typeof obj.then;
+}
+
+/**
+ * Check if `obj` is a generator.
+ *
+ * @param {Mixed} obj
+ * @return {Boolean}
+ * @api private
+ */
+
+function isGenerator(obj) {
+  return obj && 'function' == typeof obj.next && 'function' == typeof obj.throw;
+}
+
+/**
+ * Check if `obj` is a generator function.
+ *
+ * @param {Mixed} obj
+ * @return {Boolean}
+ * @api private
+ */
+
+function isGeneratorFunction(obj) {
+  return obj && obj.constructor && 'GeneratorFunction' == obj.constructor.name;
+}
+
+/**
+ * Check for plain object.
+ *
+ * @param {Mixed} val
+ * @return {Boolean}
+ * @api private
+ */
+
+function isObject(val) {
+  return val && Object == val.constructor;
+}
+
+/**
+ * Throw `err` in a new stack.
+ *
+ * This is used when co() is invoked
+ * without supplying a callback, which
+ * should only be for demonstrational
+ * purposes.
+ *
+ * @param {Error} err
+ * @api private
+ */
+
+function error(err) {
+  if (!err) return;
+  setImmediate(function(){
+    throw err;
+  });
+}
+
+});
+
+require.register("matthewmueller~wrap-fn@0.1.1", function (exports, module) {
+/**
+ * Module Dependencies
+ */
+
+var slice = [].slice;
+var co = require("visionmedia~co@3.1.0");
+var noop = function(){};
+
+/**
+ * Export `wrap-fn`
+ */
+
+module.exports = wrap;
+
+/**
+ * Wrap a function to support
+ * sync, async, and gen functions.
+ *
+ * @param {Function} fn
+ * @param {Function} done
+ * @return {Function}
+ * @api public
+ */
+
+function wrap(fn, done) {
+  done = done || noop;
+
+  return function() {
+    var args = slice.call(arguments);
+    var ctx = this;
+
+    // done
+    if (!fn) {
+      return done.apply(ctx, [null].concat(args));
+    }
+
+    // async
+    if (fn.length > args.length) {
+      return fn.apply(ctx, args.concat(done));
+    }
+
+    // generator
+    if (generator(fn)) {
+      return co(fn).apply(ctx, args.concat(done));
+    }
+
+    // sync
+    return sync(fn, done).apply(ctx, args);
+  }
+}
+
+/**
+ * Wrap a synchronous function execution.
+ *
+ * @param {Function} fn
+ * @param {Function} done
+ * @return {Function}
+ * @api private
+ */
+
+function sync(fn, done) {
+  return function () {
+    var ret;
+
+    try {
+      ret = fn.apply(this, arguments);
+    } catch (err) {
+      return done(err);
+    }
+
+    if (promise(ret)) {
+      ret.then(function (value) { done(null, value); }, done);
+    } else {
+      ret instanceof Error ? done(ret) : done(null, ret);
+    }
+  }
+}
+
+/**
+ * Is `value` a generator?
+ *
+ * @param {Mixed} value
+ * @return {Boolean}
+ * @api private
+ */
+
+function generator(value) {
+  return value
+    && value.constructor
+    && 'GeneratorFunction' == value.constructor.name;
+}
+
+
+/**
+ * Is `value` a promise?
+ *
+ * @param {Mixed} value
+ * @return {Boolean}
+ * @api private
+ */
+
+function promise(value) {
+  return value && 'function' == typeof value.then;
+}
+
+});
+
+require.register("segmentio~ware@1.2.0", function (exports, module) {
+/**
+ * Module Dependencies
+ */
+
+var slice = [].slice;
+var wrap = require("matthewmueller~wrap-fn@0.1.1");
+
+/**
+ * Expose `Ware`.
+ */
+
+module.exports = Ware;
+
+/**
+ * Initialize a new `Ware` manager, with optional `fns`.
+ *
+ * @param {Function or Array or Ware} fn (optional)
+ */
+
+function Ware (fn) {
+  if (!(this instanceof Ware)) return new Ware(fn);
+  this.fns = [];
+  if (fn) this.use(fn);
+}
+
+/**
+ * Use a middleware `fn`.
+ *
+ * @param {Function or Array or Ware} fn
+ * @return {Ware}
+ */
+
+Ware.prototype.use = function (fn) {
+  if (fn instanceof Ware) {
+    return this.use(fn.fns);
+  }
+
+  if (fn instanceof Array) {
+    for (var i = 0, f; f = fn[i++];) this.use(f);
+    return this;
+  }
+
+  this.fns.push(fn);
+  return this;
+};
+
+/**
+ * Run through the middleware with the given `args` and optional `callback`.
+ *
+ * @param {Mixed} args...
+ * @param {Function} callback (optional)
+ * @return {Ware}
+ */
+
+Ware.prototype.run = function () {
+  var fns = this.fns;
+  var ctx = this;
+  var i = 0;
+  var last = arguments[arguments.length - 1];
+  var done = 'function' == typeof last && last;
+  var args = done
+    ? slice.call(arguments, 0, arguments.length - 1)
+    : slice.call(arguments);
+
+  // next step
+  function next (err) {
+    if (err) return done(err);
+    var fn = fns[i++];
+    var arr = slice.call(args);
+
+    if (!fn) {
+      return done && done.apply(null, [null].concat(args));
+    }
+
+    wrap(fn, next).apply(ctx, arr);
+  }
+
+  next();
+
+  return this;
+};
+
+});
+
+require.register("wooorm~retext@0.2.0-rc.3", function (exports, module) {
+'use strict';
+
+var TextOMConstructor,
+    ParseLatin,
+    Ware,
+    has;
+
+/**
+ * Module dependencies.
+ */
+
+TextOMConstructor = require("wooorm~textom@0.1.1");
+ParseLatin = require("wooorm~parse-latin@0.1.3");
+Ware = require("segmentio~ware@1.2.0");
+
+/**
+ * Cached, fast, secure existence test.
+ */
+
+has = Object.prototype.hasOwnProperty;
+
+/**
+ * Transform a concrete syntax tree into a tree constructed
+ * from a given object model.
+ *
+ * @param {Object} TextOM - the object model.
+ * @param {Object} cst - the concrete syntax tree to
+ *   transform.
+ * @return {Node} the node constructed from the
+ *   CST and the object model.
+ */
+
+function fromCST(TextOM, cst) {
+    var index,
+        node,
+        children,
+        data,
+        attribute;
+
+    node = new TextOM[cst.type]();
+
+    if ('children' in cst) {
+        index = -1;
+        children = cst.children;
+
+        while (children[++index]) {
+            node.append(fromCST(TextOM, children[index]));
+        }
+    } else {
+        node.fromString(cst.value);
+    }
+
+    /**
+     * Currently, `data` properties are not really
+     * specified or documented. Therefore, the following
+     * branch is ignored by Istanbul.
+     *
+     * The idea is that plugins and parsers can each
+     * attach data to nodes, in a similar fashion to the
+     * DOMs dataset, which can be stringified and parsed
+     * back and forth between the concrete syntax tree
+     * and the node.
+     */
+
     /* istanbul ignore if: TODO, Untestable, will change soon. */
-    if ('data' in ast) {
-        data = ast.data;
+    if ('data' in cst) {
+        data = cst.data;
 
         for (attribute in data) {
-            if (data.hasOwnProperty(attribute)) {
+            if (has.call(data, attribute)) {
                 node.data[attribute] = data[attribute];
             }
         }
@@ -3588,145 +4860,201 @@ function fromAST(TextOM, ast) {
     return node;
 }
 
-function useImmediately(rootNode, use) {
-    return function (plugin) {
-        var self = this,
-            length = self.plugins.length;
-
-        use.apply(self, arguments);
-
-        if (length !== self.plugins.length) {
-            plugin(rootNode, self);
-        }
-
-        return self;
-    };
-}
-
 /**
- * Define `Retext`. Exported above, and used to instantiate a new
- * `Retext`.
+ * Construct an instance of `Retext`.
  *
- * @param {Function?} parser - the parser to use. Defaults to parse-latin.
- * @public
+ * @param {Function?} parser - the parser to use. Defaults
+ *   to a new instance of `parse-latin`.
  * @constructor
  */
+
 function Retext(parser) {
-    var self = this;
+    var self,
+        TextOM;
 
     if (!parser) {
         parser = new ParseLatin();
     }
 
+    self = this;
+    TextOM = new TextOMConstructor();
+
+    self.ware = new Ware();
     self.parser = parser;
-    self.TextOM = parser.TextOM = new TextOMConstructor();
-    self.TextOM.parser = parser;
-    self.plugins = [];
+    self.TextOM = TextOM;
+
+    /**
+     * Expose `TextOM` on `parser`, and vice versa.
+     */
+
+    parser.TextOM = TextOM;
+    TextOM.parser = parser;
 }
 
 /**
- * `Retext#use` takes a plugin-a humble function-and when the parse
- * method of the Retext instance is called, the plugin will be called
- * with the parsed tree, and the retext instance as arguments.
+ * Attaches `plugin`: a humble function.
  *
- * Note that, during the parsing stage, when the `use` method is called
- * by a plugin, the nested plugin is immediately called, before continuing
- * on with its parent plugin.
+ * When `parse` or `run` is invoked, `plugin` is
+ * invoked with `node` and a `retext` instance.
  *
- * @param {Function} plugin - the plugin to call when parsing.
- * @param {Function?} plugin.attach - called only once with a Retext
- *                                    instance. If you're planning on
- *                                    modifying TextOM or a parser, do it
- *                                    in this method.
+ * If `plugin` contains asynchronous functionality, it
+ * should accept a third argument (`next`) and invoke
+ * it on completion.
+ *
+ * `plugin.attach` is invoked with a `retext` instance
+ * when attached, enabling `plugin` to depend on other
+ * plugins.
+ *
+ * Code to initialize `plugin` should go into its `attach`
+ * method, such as functionality to modify the object model
+ * (TextOM), the parser (e.g., `parse-latin`), or the
+ * `retext` instance. `plugin.attach` is invoked when
+ * `plugin` is attached to a `retext` instance.
+ *
+ * @param {function(Node, Retext, Function?)} plugin -
+ *   functionality to analyze and manipulate a node.
+ * @param {function(Retext)} plugin.attach - functionality
+ *   to initialize `plugin`.
  * @return this
- * @public
  */
+
 Retext.prototype.use = function (plugin) {
+    var self;
+
     if (typeof plugin !== 'function') {
-        throw new TypeError('Illegal invocation: \'' + plugin +
-            '\' is not a valid argument for \'Retext.prototype.use\'');
+        throw new TypeError(
+            'Illegal invocation: `' + plugin + '` ' +
+            'is not a valid argument for `Retext#use(plugin)`'
+        );
     }
 
-    var self = this,
-        plugins = self.plugins;
+    self = this;
 
-    if (plugins.indexOf(plugin) === -1) {
+    if (self.ware.fns.indexOf(plugin) === -1) {
+        self.ware.use(plugin);
+
         if (plugin.attach) {
             plugin.attach(self);
         }
-
-        plugins.push(plugin);
     }
 
     return self;
 };
 
 /**
- * `Retext#parse` takes a source to be given (and parsed) by the parser.
- * Then, `parse` iterates over all plugins, and allows them to modify the
- * TextOM tree created by the parser.
+ * Transform a given value into a node, applies attached
+ * plugins to the node, and invokes `done` with either an
+ * error (first argument) or the transformed node (second
+ * argument).
  *
- * @param {String?} source - The source to convert.
- * @return {Node} - A RootNode containing the tokenised source.
- * @public
+ * @param {string?} value - The value to transform.
+ * @param {function(Error, Node)} done - Callback to
+ *   invoke when the transformations have completed.
+ * @return this
  */
-Retext.prototype.parse = function (source) {
-    var self = this,
-        rootNode = fromAST(self.TextOM, self.parser.tokenizeRoot(source));
 
-    self.applyPlugins(rootNode);
+Retext.prototype.parse = function (value, done) {
+    var self,
+        cst;
 
-    return rootNode;
-};
-
-/**
- * `Retext#applyPlugins` applies the plugins bound to the retext instance to a
- * given tree.
- *
- * Note that, during the parsing stage, when the `use` plugin is called
- * by a plugin, the nested plugin is immediately called, before continuing
- * on with its parent plugin.
- *
- * @param {Node} tree - The tree to apply plugins to.
- * @public
- */
-Retext.prototype.applyPlugins = function (tree) {
-    var self = this,
-        plugins = self.plugins.concat(),
-        iterator = -1,
-        use = self.use;
-
-    self.use = useImmediately(tree, use);
-
-    while (plugins[++iterator]) {
-        plugins[iterator](tree, this);
+    if (typeof done !== 'function') {
+        throw new TypeError(
+            'Illegal invocation: `' + done + '` ' +
+            'is not a valid argument for `Retext#parse(value, done)`.\n' +
+            'This breaking change occurred in 0.2.0-rc.1, see GitHub for ' +
+            'more information.'
+        );
     }
 
-    self.use = use;
+    self = this;
+
+    cst = self.parser.parse(value);
+
+    self.run(fromCST(self.TextOM, cst), done);
+
+    return self;
 };
 
 /**
- * Expose `Retext`. Used to instantiate a new Retext object.
+ * Applies attached plugins to `node` and invokes `done`
+ * with either an error (first argument) or the transformed
+ * `node` (second argument).
+ *
+ * @param {Node} node - The node to apply attached
+ *   plugins to.
+ * @param {function(Error, Node)} done - Callback to
+ *   invoke when the transformations have completed.
+ * @return this
  */
-exports = module.exports = Retext;
+
+Retext.prototype.run = function (node, done) {
+    var self;
+
+    if (typeof done !== 'function') {
+        throw new TypeError(
+            'Illegal invocation: `' + done + '` ' +
+            'is not a valid argument for ' +
+            '`Retext#run(node, done)`.\n' +
+            'This breaking change occurred in 0.2.0-rc.1, see GitHub for ' +
+            'more information.'
+        );
+    }
+
+    self = this;
+
+    self.ware.run(node, self, done);
+
+    return self;
+};
+
+/**
+ * Expose `Retext`.
+ */
+
+module.exports = Retext;
 
 });
 
-require.register("wooorm~retext-visit@0.1.0", function (exports, module) {
+require.register("wooorm~retext-visit@0.1.1", function (exports, module) {
 'use strict';
 
-exports = module.exports = function () {};
+/**
+ * Define `plugin`.
+ */
+
+function plugin() {}
+
+/**
+ * Invoke `callback` for every descendant of the
+ * operated on context.
+ *
+ * @param {function(Node): boolean?} callback - Visitor.
+ *   Stops visiting when the return value is `false`.
+ * @this {Node} Context to search in.
+ */
 
 function visit(callback) {
-    var node = this.head, next;
+    var node,
+        next;
+
+    node = this.head;
 
     while (node) {
-        // Allow for removal of the node in the callback.
+        /**
+         * Allow for removal of the node by `callback`.
+         */
+
         next = node.next;
 
         if (callback(node) === false) {
             return;
         }
+
+        /**
+         * If possible, invoke the node's own `visit`
+         *  method, otherwise call retext-visit's
+         * `visit` method.
+         */
 
         (node.visit || visit).call(node, callback);
 
@@ -3734,37 +5062,97 @@ function visit(callback) {
     }
 }
 
+/**
+ * Invoke `callback` for every descendant with a given
+ * `type` in the operated on context.
+ *
+ * @param {string} type - Type of a node.
+ * @param {function(Node): boolean?} callback - Visitor.
+ *   Stops visiting when the return value is `false`.
+ * @this {Node} Context to search in.
+ */
+
 function visitType(type, callback) {
-    var callbackWrapper = function (node) {
+    /**
+     * A wrapper for `callback` to check it the node's
+     * type property matches `type`.
+     *
+     * @param {node} type - Descendant.
+     * @return {*} Passes `callback`s return value
+     *   through.
+     */
+
+    function wrapper(node) {
         if (node.type === type) {
             return callback(node);
         }
-    };
-    this.visit.call(this, callbackWrapper);
+    }
+
+    this.visit(wrapper);
 }
 
 function attach(retext) {
-    var TextOM = retext.parser.TextOM,
-        parentPrototype = TextOM.Parent.prototype,
-        elementPrototype = TextOM.Element.prototype;
+    var TextOM,
+        parentPrototype,
+        elementPrototype;
+
+    TextOM = retext.TextOM;
+    parentPrototype = TextOM.Parent.prototype;
+    elementPrototype = TextOM.Element.prototype;
+
+    /**
+     * Expose `visit` and `visitType` on Parents.
+     *
+     * Due to multiple inheritance of Elements (Parent
+     * and Child), these methods are explicitly added.
+     */
 
     elementPrototype.visit = parentPrototype.visit = visit;
     elementPrototype.visitType = parentPrototype.visitType = visitType;
 }
 
-exports.attach = attach;
+/**
+ * Expose `attach`.
+ */
+
+plugin.attach = attach;
+
+/**
+ * Expose `plugin`.
+ */
+
+exports = module.exports = plugin;
 
 });
 
-require.register("wooorm~retext-dom@0.1.2", function (exports, module) {
+require.register("wooorm~retext-dom@0.1.3", function (exports, module) {
 'use strict';
 
-var visit = require("wooorm~retext-visit@0.1.0");
+var visit;
 
-/* istanbul ignore if: Running in the wrong environment */
+/**
+ * Module dependencies.
+ */
+
+visit = require("wooorm~retext-visit@0.1.1");
+
+/**
+ * Throw when not running in the browser (or a
+ * simulated browser environment).
+ */
+
+/* istanbul ignore if */
 if (typeof document !== 'object') {
-    throw new Error('Missing document object for retext-dom');
+    throw new Error(
+        'Missing document object for `retext-dom`.'
+    );
 }
+
+/**
+ * Event handler for an inserted TextOM node.
+ *
+ * @param {Node} node - Insertion.
+ */
 
 function oninsertinside(node) {
     node.parent.toDOMNode().insertBefore(node.toDOMNode(),
@@ -3772,17 +5160,46 @@ function oninsertinside(node) {
     );
 }
 
+/**
+ * Event handler for a removed TextOM node.
+ *
+ * @param {Node} node - Deletion.
+ */
+
 function onremoveinside(node, previousParent) {
     previousParent.toDOMNode().removeChild(node.toDOMNode());
 }
+
+/**
+ * Event handler for a value-change in a TextOM text
+ * node.
+ *
+ * @param {Node} node - Changed node.
+ */
 
 function onchangetextinside(node, newValue) {
     node.toDOMNode().textContent = newValue;
 }
 
+/**
+ * Get the DOM node-equivalent from a TextOM node.
+ *
+ * On initial run, a DOM node is created. If a
+ * `DOMTagName` property exists on the context
+ * a DOM text node is created. Otherwise, an
+ * DOM element is created of type `DOMTagName`.
+ *
+ *
+ * @this {Node}
+ * @return {Node} DOM node.
+ */
+
 function toDOMNode() {
-    var self = this,
-        DOMNode = self.DOMNode;
+    var self,
+        DOMNode;
+
+    self = this;
+    DOMNode = self.DOMNode;
 
     if (!DOMNode) {
         if (!self.DOMTagName) {
@@ -3790,33 +5207,66 @@ function toDOMNode() {
         } else {
             DOMNode = document.createElement(self.DOMTagName);
         }
+
+        /**
+         * Store DOM node on context.
+         */
+
         self.DOMNode = DOMNode;
+
+        /**
+         * Store context on DOM node.
+         */
+
         DOMNode.TextOMNode = self;
     }
 
     return DOMNode;
 }
 
+/**
+ * Define `plugin`.
+ *
+ * @param {Node} tree - TextOM node.
+ */
+
 function plugin(tree) {
     tree.on('insertinside', oninsertinside);
     tree.on('removeinside', onremoveinside);
     tree.on('changetextinside', onchangetextinside);
 
+    /**
+     * Make sure a parent DOM node, to attach to,
+     * exists.
+     */
+
     tree.toDOMNode();
 
     tree.visit(function (node) {
-        oninsertinside.call(tree, node);
+        oninsertinside(node);
 
         if (node instanceof node.TextOM.Text) {
-            onchangetextinside.call(tree, node, node.toString(), null);
+            onchangetextinside(node, node.toString(), null);
         }
     });
 }
 
+/**
+ * Define `attach`.
+ *
+ * @param {Retext} retext - Instance of Retext.
+ */
+
 function attach(retext) {
-    var TextOM = retext.parser.TextOM;
+    var TextOM;
+
+    /**
+     * Depend on `retext-visit`.
+     */
 
     retext.use(visit);
+
+    TextOM = retext.TextOM;
 
     TextOM.Node.prototype.toDOMNode = toDOMNode;
 
@@ -3827,13 +5277,21 @@ function attach(retext) {
     TextOM.Text.prototype.DOMTagName = null;
 }
 
+/**
+ * Expose `attach`.
+ */
+
 plugin.attach = attach;
 
-exports = module.exports = plugin;
+/**
+ * Expose `plugin`.
+ */
+
+module.exports = plugin;
 
 });
 
-require.register("wooorm~stemmer@0.1.0", function (exports, module) {
+require.register("wooorm~stemmer@0.1.1", function (exports, module) {
 'use strict';
 
 var step2list, step3list, consonant, vowel, consonantSequence,
@@ -3932,7 +5390,7 @@ EXPRESSION_STEP_4 = new RegExp(
 function stemmer(value) {
     var firstCharacterWasLowerCaseY, match;
 
-    value = value.toString();
+    value = value.toString().toLowerCase();
 
     if (value.length < 3) {
         return value;
@@ -4048,36 +5506,73 @@ module.exports = stemmer;
 
 });
 
-require.register("wooorm~retext-porter-stemmer@0.1.0", function (exports, module) {
+require.register("wooorm~retext-porter-stemmer@0.1.1", function (exports, module) {
 'use strict';
 
-exports = module.exports = function () {};
+var stemmer;
 
-var stemmer = require("wooorm~stemmer@0.1.0");
+/**
+ * Module dependencies.
+ */
+
+stemmer = require("wooorm~stemmer@0.1.1");
+
+/**
+ * Define `porterStemmer`;
+ */
+
+function porterStemmer() {}
+
+/**
+ * `changetextinside` handler;
+ *
+ * @this Node
+ */
 
 function onchangetextinside() {
-    var value = this.toString();
+    var value;
+
+    value = this.toString();
+
     this.data.stem = value ? stemmer(value) : null;
 }
 
+/**
+ * Define `attach`.
+ *
+ * @param {Retext} retext - Instance of Retext.
+ */
+
 function attach(retext) {
-    retext.parser.TextOM.WordNode.on('changetextinside', onchangetextinside);
-    retext.parser.TextOM.WordNode.on('removeinside', onchangetextinside);
-    retext.parser.TextOM.WordNode.on('insertinside', onchangetextinside);
+    var WordNode;
+
+    WordNode = retext.parser.TextOM.WordNode;
+
+    WordNode.on('changetextinside', onchangetextinside);
+    WordNode.on('removeinside', onchangetextinside);
+    WordNode.on('insertinside', onchangetextinside);
 }
 
-exports.attach = attach;
+/**
+ * Expose `attach`.
+ */
 
-exports.porterStemmer = stemmer;
+porterStemmer.attach = attach;
+
+/**
+ * Expose `porterStemmer`.
+ */
+
+module.exports = porterStemmer;
 
 });
 
 require.register("retext-double-metaphone-gh-pages", function (exports, module) {
-var retextDoubleMetaphone = require("wooorm~retext-double-metaphone@0.1.0"),
-    porterStemmer = require("wooorm~retext-porter-stemmer@0.1.0"),
-    visit = require("wooorm~retext-visit@0.1.0"),
-    dom = require("wooorm~retext-dom@0.1.2"),
-    Retext = require("wooorm~retext@0.1.1"),
+var retextDoubleMetaphone = require("wooorm~retext-double-metaphone@0.1.1"),
+    porterStemmer = require("wooorm~retext-porter-stemmer@0.1.1"),
+    visit = require("wooorm~retext-visit@0.1.1"),
+    dom = require("wooorm~retext-dom@0.1.3"),
+    Retext = require("wooorm~retext@0.2.0-rc.3"),
     retext = new Retext().use(visit).use(retextDoubleMetaphone).use(porterStemmer).use(dom),
     inputElement = document.getElementsByTagName('textarea')[0],
     outputElement = document.getElementsByTagName('div')[0],
@@ -4136,38 +5631,42 @@ function onphonetics(phonetic) {
 function getPhonetics() {
     value = inputElement.value;
 
-    if (currentDOMTree) {
-        currentDOMTree.parentNode.removeChild(currentDOMTree);
-    }
+    retext.parse(value, function (err, tree) {
+        if (err) throw err;
 
-    currentTree = retext.parse(value);
-
-    currentTree.visit(function (node) {
-        var phonetic;
-
-        if (!node.DOMTagName || !node.data.phonetics) {
-            return;
+        if (currentDOMTree) {
+            currentDOMTree.parentNode.removeChild(currentDOMTree);
         }
 
-        phonetic = node.data.phonetics;
+        currentTree = tree;
+        
+        currentTree.visit(function (node) {
+            var phonetic;
 
-        if (shouldUseStemmedPhonetics) {
-            phonetic = node.data.stemmedPhonetics;
-        }
+            if (!node.DOMTagName || !node.data.phonetics) {
+                return;
+            }
 
-        node.toDOMNode().setAttribute('title', '["' + phonetic[0] + '", "' + phonetic[1] + '"]');
+            phonetic = node.data.phonetics;
 
-        onphonetics(phonetic[0]);
-        onphonetics(phonetic[1]);
-        node.toDOMNode().setAttribute('data-phonetics', phonetic[0]);
+            if (shouldUseStemmedPhonetics) {
+                phonetic = node.data.stemmedPhonetics;
+            }
 
-        if (phonetic[0] !== phonetic[1]) {
-            node.toDOMNode().setAttribute('data-secondary-phonetics', phonetic[1]);
-        }
+            node.toDOMNode().setAttribute('title', '["' + phonetic[0] + '", "' + phonetic[1] + '"]');
+
+            onphonetics(phonetic[0]);
+            onphonetics(phonetic[1]);
+            node.toDOMNode().setAttribute('data-phonetics', phonetic[0]);
+
+            if (phonetic[0] !== phonetic[1]) {
+                node.toDOMNode().setAttribute('data-secondary-phonetics', phonetic[1]);
+            }
+        });
+
+        currentDOMTree = currentTree.toDOMNode();
+        outputElement.appendChild(currentDOMTree);
     });
-
-    currentDOMTree = currentTree.toDOMNode();
-    outputElement.appendChild(currentDOMTree);
 }
 
 function onchange(event) {

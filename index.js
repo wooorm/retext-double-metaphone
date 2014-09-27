@@ -61,38 +61,42 @@ function onphonetics(phonetic) {
 function getPhonetics() {
     value = inputElement.value;
 
-    if (currentDOMTree) {
-        currentDOMTree.parentNode.removeChild(currentDOMTree);
-    }
+    retext.parse(value, function (err, tree) {
+        if (err) throw err;
 
-    currentTree = retext.parse(value);
-
-    currentTree.visit(function (node) {
-        var phonetic;
-
-        if (!node.DOMTagName || !node.data.phonetics) {
-            return;
+        if (currentDOMTree) {
+            currentDOMTree.parentNode.removeChild(currentDOMTree);
         }
 
-        phonetic = node.data.phonetics;
+        currentTree = tree;
+        
+        currentTree.visit(function (node) {
+            var phonetic;
 
-        if (shouldUseStemmedPhonetics) {
-            phonetic = node.data.stemmedPhonetics;
-        }
+            if (!node.DOMTagName || !node.data.phonetics) {
+                return;
+            }
 
-        node.toDOMNode().setAttribute('title', '["' + phonetic[0] + '", "' + phonetic[1] + '"]');
+            phonetic = node.data.phonetics;
 
-        onphonetics(phonetic[0]);
-        onphonetics(phonetic[1]);
-        node.toDOMNode().setAttribute('data-phonetics', phonetic[0]);
+            if (shouldUseStemmedPhonetics) {
+                phonetic = node.data.stemmedPhonetics;
+            }
 
-        if (phonetic[0] !== phonetic[1]) {
-            node.toDOMNode().setAttribute('data-secondary-phonetics', phonetic[1]);
-        }
+            node.toDOMNode().setAttribute('title', '["' + phonetic[0] + '", "' + phonetic[1] + '"]');
+
+            onphonetics(phonetic[0]);
+            onphonetics(phonetic[1]);
+            node.toDOMNode().setAttribute('data-phonetics', phonetic[0]);
+
+            if (phonetic[0] !== phonetic[1]) {
+                node.toDOMNode().setAttribute('data-secondary-phonetics', phonetic[1]);
+            }
+        });
+
+        currentDOMTree = currentTree.toDOMNode();
+        outputElement.appendChild(currentDOMTree);
     });
-
-    currentDOMTree = currentTree.toDOMNode();
-    outputElement.appendChild(currentDOMTree);
 }
 
 function onchange(event) {

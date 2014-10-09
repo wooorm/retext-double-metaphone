@@ -11,7 +11,7 @@ var doubleMetaphone,
     Retext,
     assert;
 
-doubleMetaphone = require('..');
+doubleMetaphone = require('./');
 Retext = require('retext');
 visit = require('retext-visit');
 content = require('retext-content');

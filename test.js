@@ -78,7 +78,7 @@ describe('double-metaphone()', function () {
         });
 
         it('should process each `WordNode`', function () {
-            tree.visitType(tree.WORD_NODE, function (node) {
+            tree.visit(tree.WORD_NODE, function (node) {
                 assert('phonetics' in node.data);
             });
         });
@@ -86,7 +86,7 @@ describe('double-metaphone()', function () {
         it('should set `phonetics` to `null` when `WordNode` (no ' +
             'longer?) has a value',
             function () {
-                tree.visitType(tree.WORD_NODE, function (node) {
+                tree.visit(tree.WORD_NODE, function (node) {
                     node.removeContent();
 
                     assert(node.data.phonetics === null);
@@ -100,7 +100,7 @@ describe('double-metaphone()', function () {
 
                 index = -1;
 
-                tree.visitType(tree.WORD_NODE, function (node) {
+                tree.visit(tree.WORD_NODE, function (node) {
                     var phonetics;
 
                     index++;
@@ -124,7 +124,7 @@ describe('double-metaphone() with a stemmer', function () {
         });
 
         it('should process `stem` in each `WordNode`', function () {
-            tree.visitType(tree.WORD_NODE, function (node) {
+            tree.visit(tree.WORD_NODE, function (node) {
                 assert('stemmedPhonetics' in node.data);
             });
         });
@@ -132,7 +132,7 @@ describe('double-metaphone() with a stemmer', function () {
         it('should set `stemmedPhonetics` to `null` when `WordNode` (no ' +
             'longer?) has a value',
             function () {
-                tree.visitType(tree.WORD_NODE, function (node) {
+                tree.visit(tree.WORD_NODE, function (node) {
                     node.removeContent();
 
                     assert(node.data.stemmedPhonetics === null);
@@ -146,7 +146,7 @@ describe('double-metaphone() with a stemmer', function () {
 
                 index = -1;
 
-                tree.visitType(tree.WORD_NODE, function (node) {
+                tree.visit(tree.WORD_NODE, function (node) {
                     var stemmedPhonetics;
 
                     index++;

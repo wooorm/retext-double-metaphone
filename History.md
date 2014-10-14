@@ -1,4 +1,12 @@
 
+n.n.n / 2014-10-14
+==================
+
+ * Update tests for changes in retext-visit
+ * Update jscs, retext, retext-content, retext-porter-stemmer, retext-visit
+ * Update .gitignore, .npmignore, bower ignore
+ * Move spec to test.js
+
 0.1.1 / 2014-09-26
 ==================
 

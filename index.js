@@ -1,15 +1,38 @@
-var retextDoubleMetaphone = require('retext-double-metaphone'),
-    porterStemmer = require('retext-porter-stemmer'),
-    visit = require('retext-visit'),
-    dom = require('retext-dom'),
-    Retext = require('retext'),
-    retext = new Retext().use(visit).use(retextDoubleMetaphone).use(porterStemmer).use(dom),
-    inputElement = document.getElementsByTagName('textarea')[0],
-    outputElement = document.getElementsByTagName('div')[0],
-    stemElement = document.getElementsByName('stem')[0],
-    style = document.styleSheets[0],
-    phonetics = {},
-    shouldUseStemmedPhonetics, currentDOMTree, currentTree;
+/**
+ * Dependencies.
+ */
+
+var Retext = require('wooorm/retext@0.4.0');
+var doubleMetaphone = require('wooorm/retext-double-metaphone@0.1.5');
+var stemmer = require('wooorm/retext-porter-stemmer@0.2.2');
+var dom = require('wooorm/retext-dom@0.2.4');
+var visit = require('wooorm/retext-visit@0.2.2');
+
+/**
+ * Retext.
+ */
+
+var retext = new Retext()
+    .use(visit)
+    .use(dom)
+    .use(doubleMetaphone)
+    .use(stemmer);
+
+/**
+ * DOM elements.
+ */
+
+var $input = document.getElementsByTagName('textarea')[0];
+var $output = document.getElementsByTagName('div')[0];
+var $stem = document.getElementsByTagName('input')[0];
+
+/**
+ * Get a color representation from a string.
+ */
+
+var style = document.styleSheets[0];
+
+var phonetics = {};
 
 function hashCode(str) {
     var hash = 0;
@@ -26,7 +49,7 @@ function intToARGB(i){
            (i&0xFF).toString(16);
 }
 
-function getColourFromString(value) {
+function getColorFromString(value) {
     value = intToARGB(hashCode(value)).slice(0, 6);
 
     while (value.length < 6) {
@@ -36,6 +59,10 @@ function getColourFromString(value) {
     return '#' + value;
 }
 
+/**
+ * Add a CSS rule.
+ */
+
 function addCSSRule(sheet, selector, rules) {
     if(sheet.insertRule) {
         sheet.insertRule(selector + '{' + rules + '}');
@@ -44,35 +71,49 @@ function addCSSRule(sheet, selector, rules) {
     }
 }
 
+/**
+ * Callback when new phonetics are calculated.
+ */
+
 function onphonetics(phonetic) {
-    var colour;
+    var color;
 
     if (phonetic in phonetics) {
         return;
     }
 
-    colour = getColourFromString(phonetic)
-    phonetics[phonetic] = colour;
+    color = getColorFromString(phonetic)
+    phonetics[phonetic] = color;
 
-    addCSSRule(style, '[data-phonetics="' + phonetic + '"]', 'color:' + colour);
-    addCSSRule(style, '[data-secondary-phonetics="' + phonetic + '"]', 'border-bottom-color:' + colour);
+    addCSSRule(style, '[data-phonetics="' + phonetic + '"]', 'color:' + color);
+    addCSSRule(style, '[data-secondary-phonetics="' + phonetic + '"]', 'border-bottom-color:' + color);
 }
 
-function getPhonetics() {
-    value = inputElement.value;
+/**
+ * Events
+ */
 
-    retext.parse(value, function (err, tree) {
+var shouldUseStemmedPhonetics = $stem.checked;
+
+function onshouldstemchange() {
+    shouldUseStemmedPhonetics = $stem.checked;
+
+    oninputchange();
+}
+
+var tree;
+
+function oninputchange() {
+    if (tree) {
+        tree.toDOMNode().parentNode.removeChild(tree.toDOMNode());
+    }
+
+    retext.parse($input.value, function (err, root) {
         if (err) throw err;
 
-        if (currentDOMTree) {
-            currentDOMTree.parentNode.removeChild(currentDOMTree);
-        }
+        tree = root;
 
-        currentTree = tree;
-        
-        currentTree.visit(function (node) {
-            var phonetic;
-
+        tree.visit(function (node) {
             if (!node.DOMTagName || !node.data.phonetics) {
                 return;
             }
@@ -83,28 +124,28 @@ function getPhonetics() {
                 phonetic = node.data.stemmedPhonetics;
             }
 
-            node.toDOMNode().setAttribute('title', '["' + phonetic[0] + '", "' + phonetic[1] + '"]');
+            node.toDOMNode().setAttribute(
+                'title', '["' + phonetic[0] + '", "' + phonetic[1] + '"]'
+            );
 
             onphonetics(phonetic[0]);
             onphonetics(phonetic[1]);
+
             node.toDOMNode().setAttribute('data-phonetics', phonetic[0]);
 
             if (phonetic[0] !== phonetic[1]) {
                 node.toDOMNode().setAttribute('data-secondary-phonetics', phonetic[1]);
             }
+
+
+            node.toDOMNode().setAttribute('title', phonetic);
         });
 
-        currentDOMTree = currentTree.toDOMNode();
-        outputElement.appendChild(currentDOMTree);
+        $output.appendChild(tree.toDOMNode());
     });
 }
 
-function onchange(event) {
-    shouldUseStemmedPhonetics = event.target.checked;
-    getPhonetics();
-}
+$input.addEventListener('input', oninputchange);
+$stem.addEventListener('change', onshouldstemchange);
 
-inputElement.addEventListener('input', getPhonetics);
-stemElement.addEventListener('change', onchange);
-onchange({'target' : stemElement});
-getPhonetics();
+onshouldstemchange();

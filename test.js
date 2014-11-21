@@ -4,18 +4,20 @@
  * Dependencies.
  */
 
-var doubleMetaphone,
-    content,
+var Retext,
+    doubleMetaphone,
     stemmer,
+    inspect,
+    content,
     visit,
-    Retext,
     assert;
 
-doubleMetaphone = require('./');
 Retext = require('retext');
-visit = require('retext-visit');
-content = require('retext-content');
+doubleMetaphone = require('./');
 stemmer = require('retext-porter-stemmer');
+inspect = require('retext-inspect');
+content = require('retext-content');
+visit = require('retext-visit');
 assert = require('assert');
 
 /**
@@ -26,11 +28,13 @@ var retext,
     retextWithStemmer;
 
 retext = new Retext()
+    .use(inspect)
     .use(doubleMetaphone)
     .use(visit)
     .use(content);
 
 retextWithStemmer = new Retext()
+    .use(inspect)
     .use(doubleMetaphone)
     .use(stemmer)
     .use(visit)

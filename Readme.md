@@ -22,53 +22,67 @@ $ bower install retext-double-metaphone
 ## Usage
 
 ```js
-var Retext = require('retext'),
-    visit = require('retext-visit'),
-    doubleMetaphone = require('retext-double-metaphone'),
-    retext;
+var Retext = require('retext');
+var visit = require('retext-visit');
+var inspect = require('retext-inspect');
+var doubleMetaphone = require('retext-double-metaphone');
 
-retext = new Retext()
+var retext = new Retext()
+    .use(inspect)
     .use(visit)
     .use(doubleMetaphone);
 
 retext.parse('A simple english sentence.', function (err, tree) {
-    tree.visitType(tree.WORD_NODE, function (node) {
-        console.log(node.toString(), node.data.phonetics);
+    tree.visit(tree.WORD_NODE, function (node) {
+        console.log(node);
     });
-    // 'A', [ 'A', 'A' ]
-    // 'simple', [ 'SMPL', 'SMPL' ]
-    // 'english', [ 'ANKLX', 'ANLX' ]
-    // 'sentence', [ 'SNTNS', 'SNTNS' ]
+    /**
+     * WordNode[1] [data={"phonetics":["A","A"]}]
+     * └─ TextNode: 'A'
+     * WordNode[1] [data={"phonetics":["SMPL","SMPL"]}]
+     * └─ TextNode: 'simple'
+     * WordNode[1] [data={"phonetics":["ANKLX","ANLX"]}]
+     * └─ TextNode: 'english'
+     * WordNode[1] [data={"phonetics":["SNTNS","SNTNS"]}]
+     * └─ TextNode: 'sentence'
+     */
 });
 ```
 
 You can also combine it with a stemmer (such as [retext-porter-stemmer](https://github.com/wooorm/retext-porter-stemmer), [retext-lancaster-stemmer](https://github.com/wooorm/retext-lancaster-stemmer)).
 
 ```js
-var Retext = require('retext'),
-    visit = require('retext-visit'),
-    doubleMetaphone = require('retext-double-metaphone'),
-    stemmer = require('retext-porter-stemmer'),
-    retext;
+var Retext = require('retext');
+var visit = require('retext-visit');
+var inspect = require('retext-inspect');
+var doubleMetaphone = require('retext-double-metaphone');
+var stemmer = require('retext-porter-stemmer');
 
-retext = new Retext()
+var retext = new Retext()
+    .use(inspect)
     .use(visit)
     .use(doubleMetaphone)
+    /* make sure to attach the stemmer after metaphone. */
     .use(stemmer);
 
-retext.parse('A detestable paragraph', function (err, tree) {
-    tree.visitType(tree.WORD_NODE, function (node) {
-        console.log(node.toString(), node.data.phonetics, node.data.stemmedPhonetics);
+retext.parse('A detestable paragraph.', function (err, tree) {
+    tree.visit(tree.WORD_NODE, function (node) {
+        console.log(node);
     });
-    // 'A', [ 'A', 'A' ], [ 'A', 'A' ]
-    // 'detestable', [ 'TTSTPL', 'TTSTPL' ], [ 'TTST', 'TTST' ]
-    // 'paragraph', [ 'PRKRF', 'PRKRF' ], [ 'PRKRF', 'PRKRF' ]
+    /**
+     * WordNode[1] [data={"stem":"a","phonetics":["A","A"],"stemmedPhonetics":["A","A"]}]
+     * └─ TextNode: 'A'
+     * WordNode[1] [data={"stem":"detest","phonetics":["TTSTPL","TTSTPL"],"stemmedPhonetics":["TTST","TTST"]}]
+     * └─ TextNode: 'detestable'
+     * WordNode[1] [data={"stem":"paragraph","phonetics":["PRKRF","PRKRF"],"stemmedPhonetics":["PRKRF","PRKRF"]}]
+     * └─ TextNode: 'paragraph'
+     */
 });
 ```
 
 ## API
 
-None, the plugin automatically detects the phonetics of each word (using [wooorm/double-metaphone](https://github.com/wooorm/double-metaphone)) when it’s created or changed, and stores the phonetics in `wordNode.data.phonetics`.
+None, the plugin automatically detects the phonetics of each word (using [wooorm/double-metaphone](https://github.com/wooorm/double-metaphone)), and stores the phonetics in `wordNode.data.phonetics`. If a stemmer is used, the stemmed phonetics are stored in `wordNode.data.stemmedPhonetics`.
 
 ## License
 

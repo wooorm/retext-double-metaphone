@@ -86,4 +86,4 @@ None, the plugin automatically detects the phonetics of each word (using [wooorm
 
 ## License
 
-MIT © Titus Wormer
+MIT © [Titus Wormer](http://wooorm.com)

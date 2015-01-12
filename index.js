@@ -35,11 +35,7 @@ function onchange() {
  */
 
 function doubleMetaphone(retext) {
-    var WordNode = retext.TextOM.WordNode;
-
-    WordNode.on('changetextinside', onchange);
-    WordNode.on('removeinside', onchange);
-    WordNode.on('insertinside', onchange);
+    retext.TextOM.WordNode.on('changeinside', onchange);
 }
 
 /**

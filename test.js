@@ -1,6 +1,6 @@
 'use strict';
 
-/**
+/*
  * Dependencies.
  */
 
@@ -20,7 +20,7 @@ content = require('retext-content');
 visit = require('retext-visit');
 assert = require('assert');
 
-/**
+/*
  * Retext.
  */
 
@@ -40,7 +40,7 @@ retextWithStemmer = new Retext()
     .use(visit)
     .use(content);
 
-/**
+/*
  * Fixtures.
  */
 
@@ -67,7 +67,7 @@ stemmedOtherPhonetics = [
     ['PRKRF', 'PRKRF']
 ];
 
-/**
+/*
  * Tests.
  */
 

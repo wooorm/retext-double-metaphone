@@ -1,6 +1,6 @@
 'use strict';
 
-/**
+/*
  * Dependencies.
  */
 
@@ -13,7 +13,6 @@ phonetics = require('double-metaphone');
  *
  * @this {WordNode}
  */
-
 function onchange() {
     var data,
         value;
@@ -33,12 +32,11 @@ function onchange() {
  *
  * @param {Retext} retext
  */
-
 function doubleMetaphone(retext) {
     retext.TextOM.WordNode.on('changeinside', onchange);
 }
 
-/**
+/*
  * Expose `doubleMetaphone`.
  */
 

@@ -3,14 +3,14 @@
 var Retext,
     doubleMetaphone;
 
-/**
+/*
  * Dependencies.
  */
 
 Retext = require('retext');
 doubleMetaphone = require('./');
 
-/**
+/*
  * Dependencies.
  */
 
@@ -20,7 +20,7 @@ var retext,
 retext = new Retext();
 retextWithDoubleMetaphone = new Retext().use(doubleMetaphone);
 
-/**
+/*
  * Test data: A (big?) article (w/ 100 paragraphs, 500
  * sentences, 10,000 words);
  *

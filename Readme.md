@@ -5,23 +5,26 @@
 ## Installation
 
 npm:
-```sh
+
+```bash
 $ npm install retext-double-metaphone
 ```
 
 Component:
-```sh
+
+```bash
 $ component install wooorm/retext-double-metaphone
 ```
 
 Bower:
-```sh
+
+```bash
 $ bower install retext-double-metaphone
 ```
 
 ## Usage
 
-```js
+```javascript
 var Retext = require('retext');
 var visit = require('retext-visit');
 var inspect = require('retext-inspect');
@@ -51,7 +54,7 @@ retext.parse('A simple english sentence.', function (err, tree) {
 
 You can also combine it with a stemmer (such as [retext-porter-stemmer](https://github.com/wooorm/retext-porter-stemmer), [retext-lancaster-stemmer](https://github.com/wooorm/retext-lancaster-stemmer)).
 
-```js
+```javascript
 var Retext = require('retext');
 var visit = require('retext-visit');
 var inspect = require('retext-inspect');
@@ -88,7 +91,7 @@ None, **retext-double-metaphone** automatically detects the phonetics of each [`
 
 On a MacBook Air, **retext** performs about 20% slower with **retext-double-metaphone**.
 
-```
+```text
            retext w/o retext-double-metaphone
   217 op/s » A paragraph (5 sentences, 100 words)
    24 op/s » A section (10 paragraphs, 50 sentences, 1,000 words)

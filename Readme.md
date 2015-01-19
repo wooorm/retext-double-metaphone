@@ -4,19 +4,19 @@
 
 ## Installation
 
-npm:
+[npm](https://docs.npmjs.com/cli/install):
 
 ```bash
 $ npm install retext-double-metaphone
 ```
 
-Component:
+[Component.js](https://github.com/componentjs/component):
 
 ```bash
 $ component install wooorm/retext-double-metaphone
 ```
 
-Bower:
+[Bower](http://bower.io/#install-packages):
 
 ```bash
 $ bower install retext-double-metaphone
@@ -39,7 +39,7 @@ retext.parse('A simple english sentence.', function (err, tree) {
     tree.visit(tree.WORD_NODE, function (node) {
         console.log(node);
     });
-    /**
+    /*
      * WordNode[1] [data={"phonetics":["A","A"]}]
      * └─ TextNode: 'A'
      * WordNode[1] [data={"phonetics":["SMPL","SMPL"]}]
@@ -72,7 +72,7 @@ retext.parse('A detestable paragraph.', function (err, tree) {
     tree.visit(tree.WORD_NODE, function (node) {
         console.log(node);
     });
-    /**
+    /*
      * WordNode[1] [data={"stem":"a","phonetics":["A","A"],"stemmedPhonetics":["A","A"]}]
      * └─ TextNode: 'A'
      * WordNode[1] [data={"stem":"detest","phonetics":["TTSTPL","TTSTPL"],"stemmedPhonetics":["TTST","TTST"]}]

@@ -1,43 +1,62 @@
+/**
+ * @author Titus Wormer
+ * @copyright 2014-2015 Titus Wormer
+ * @license MIT
+ * @module retext:metaphone
+ * @fileoverview Retext implementation of the Metaphone algorithm.
+ */
+
 'use strict';
 
 /*
  * Dependencies.
  */
 
-var phonetics;
-
-phonetics = require('double-metaphone');
+var algorithm = require('double-metaphone');
+var visit = require('unist-util-visit');
+var nlcstToString = require('nlcst-to-string');
 
 /**
- * Change handler.
+ * Patch a `phonetics` property on `node` (a word-node).
+ * When a `stem` property is available on the node’s data
+ * object, a `stemmedPhonetics` is added on the data
+ * as well.
  *
- * @this {WordNode}
+ * @param {NLCSTWordNode} node - Node.
  */
-function onchange() {
-    var data,
-        value;
+function patch(node) {
+    var data = node.data || {};
+    var value = nlcstToString(node);
 
-    data = this.data;
-    value = this.toString();
-
-    data.phonetics = value ? phonetics(value) : null;
+    data.phonetics = algorithm(value);
 
     if ('stem' in data) {
-        data.stemmedPhonetics = value ? phonetics(data.stem) : null;
+        data.stemmedPhonetics = algorithm(data.stem);
     }
+
+    node.data = data;
 }
 
 /**
- * Define `doubleMetaphone`.
+ * Patch `stem` on each node.
  *
- * @param {Retext} retext
+ * @param {NLCSTNode} cst - Syntax tree.
  */
-function doubleMetaphone(retext) {
-    retext.TextOM.WordNode.on('changeinside', onchange);
+function transformer(cst) {
+    visit(cst, 'WordNode', patch);
+}
+
+/**
+ * Define `metaphone`.
+ *
+ * @return {Function} - `transformer`.
+ */
+function attacher() {
+    return transformer;
 }
 
 /*
- * Expose `doubleMetaphone`.
+ * Expose `metaphone`.
  */
 
-module.exports = doubleMetaphone;
+module.exports = attacher;

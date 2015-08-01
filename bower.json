@@ -1,6 +1,6 @@
 {
   "name": "retext-double-metaphone",
-  "main": "index.js",
+  "main": "retext-double-metaphone.js",
   "description": "Retext implementation of the Double Metaphone algorithm",
   "license": "MIT",
   "keywords": [
@@ -8,9 +8,6 @@
     "metaphone",
     "retext"
   ],
-  "dependencies": {
-    "double-metaphone": "^0.1.0"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/wooorm/retext-double-metaphone.git"

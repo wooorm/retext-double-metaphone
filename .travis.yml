@@ -3,11 +3,7 @@ script: npm run-script test-travis
 node_js:
 - '0.10'
 - '0.11'
-after_script: npm install coveralls@2.10.0 && cat ./coverage/lcov.info | coveralls
-deploy:
-  provider: npm
-  email: tituswormer@gmail.com
-  api_key:
-    secure: ZG9iBBqgKXjWHYIbZwYKwwW6xKxYd/efVf8LqtY6ZL9fyXRcCQiN9wi5wi8lIiQ+w0vu/b7/5rr90rekza0AdoiSQxpZDOx3bF8FnURalVg6hddk72JsZ1hroy6QoxkhzTeZIi9YuAg0LVAXvZZikQPVl3WpmqLgVZGQlt4JpVY=
-  on:
-    repo: wooorm/retext-double-metaphone
+- '0.12'
+- iojs
+sudo: false
+after_script: npm install codecov.io && cat ./coverage/lcov.info | codecov

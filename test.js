@@ -1,175 +1,93 @@
 'use strict';
 
+/* eslint-env mocha */
+
 /*
  * Dependencies.
  */
 
-var Retext,
-    doubleMetaphone,
-    stemmer,
-    inspect,
-    content,
-    visit,
-    assert;
-
-Retext = require('retext');
-doubleMetaphone = require('./');
-stemmer = require('retext-porter-stemmer');
-inspect = require('retext-inspect');
-content = require('retext-content');
-visit = require('retext-visit');
-assert = require('assert');
+var assert = require('assert');
+var retext = require('retext');
+var nlcstToString = require('nlcst-to-string');
+var visit = require('unist-util-visit');
+var doubleMetaphone = require('./');
 
 /*
- * Retext.
+ * Methods.
  */
 
-var retext,
-    retextWithStemmer;
-
-retext = new Retext()
-    .use(inspect)
-    .use(doubleMetaphone)
-    .use(visit)
-    .use(content);
-
-retextWithStemmer = new Retext()
-    .use(inspect)
-    .use(doubleMetaphone)
-    .use(stemmer)
-    .use(visit)
-    .use(content);
+var equal = assert.equal;
+var dequal = assert.deepEqual;
 
 /*
  * Fixtures.
  */
 
-var sentence,
-    words,
-    otherPhonetics,
-    stemmedOtherPhonetics;
+var sentence = 'A simple, English, sentence';
 
-sentence = 'A simple, English, sentence.';
-
-words = ['A', 'detestable', 'vile', 'paragraph'];
-
-otherPhonetics = [
+var phonetics = [
     ['A', 'A'],
-    ['TTSTPL', 'TTSTPL'],
-    ['FL', 'FL'],
-    ['PRKRF', 'PRKRF']
+    ['SMPL', 'SMPL'],
+    ['ANKLX', 'ANLX'],
+    ['SNTNS', 'SNTNS']
 ];
 
-stemmedOtherPhonetics = [
-    ['A', 'A'],
-    ['TTST', 'TTST'],
-    ['FL', 'FL'],
-    ['PRKRF', 'PRKRF']
-];
+/**
+ * Example stemmer, which expects the tree to equal `otherWord`.
+ */
+function stemmer() {
+    return function (cst) {
+        visit(cst, 'WordNode', function (node) {
+            node.data = {
+                'stem': nlcstToString(node)
+            };
+        });
+    };
+}
 
 /*
  * Tests.
  */
 
-describe('double-metaphone()', function () {
-    it('should be a `function`', function () {
-        assert(typeof doubleMetaphone === 'function');
+describe('doubleMetaphone()', function () {
+    var processor = retext.use(doubleMetaphone);
+
+    it('should be of type `function`', function () {
+        equal(typeof doubleMetaphone, 'function');
     });
 
-    retext.parse(sentence, function (err, tree) {
+    processor.process(sentence, function (e, file) {
+        var cst = file.namespace('retext').cst;
+
         it('should not throw', function (done) {
-            done(err);
+            done(e);
         });
 
         it('should process each `WordNode`', function () {
-            tree.visit(tree.WORD_NODE, function (node) {
+            var index = -1;
+
+            visit(cst, 'WordNode', function (node) {
                 assert('phonetics' in node.data);
+                dequal(node.data.phonetics, phonetics[++index]);
             });
         });
-
-        it('should set `phonetics` to `null` when `WordNode` (no ' +
-            'longer?) has a value',
-            function () {
-                tree.visit(tree.WORD_NODE, function (node) {
-                    node.removeContent();
-
-                    assert(node.data.phonetics === null);
-                });
-            }
-        );
-
-        it('should re-process `WordNode`s when their value changes',
-            function () {
-                var index;
-
-                index = -1;
-
-                tree.visit(tree.WORD_NODE, function (node) {
-                    var phonetics;
-
-                    index++;
-
-                    node.replaceContent(words[index]);
-
-                    phonetics = node.data.phonetics;
-
-                    assert(phonetics[0] === otherPhonetics[index][0]);
-                    assert(phonetics[1] === otherPhonetics[index][1]);
-                });
-            }
-        );
     });
 });
 
-describe('double-metaphone() with a stemmer', function () {
-    retextWithStemmer.parse(sentence, function (err, tree) {
+describe('doubleMetaphone() with a stemmer', function () {
+    var processor = retext.use(stemmer).use(doubleMetaphone);
+
+    processor.process(sentence, function (e, file) {
+        var cst = file.namespace('retext').cst;
+
         it('should not throw', function (done) {
-            done(err);
+            done(e);
         });
 
         it('should process `stem` in each `WordNode`', function () {
-            tree.visit(tree.WORD_NODE, function (node) {
-                assert('stemmedPhonetics' in node.data);
+            visit(cst, 'WordNode', function (node) {
+                dequal(node.data.stemmedPhonetics, node.data.phonetics);
             });
         });
-
-        it('should set `stemmedPhonetics` to `null` when `WordNode` (no ' +
-            'longer?) has a value',
-            function () {
-                tree.visit(tree.WORD_NODE, function (node) {
-                    node.removeContent();
-
-                    assert(node.data.stemmedPhonetics === null);
-                });
-            }
-        );
-
-        it('should re-process `WordNode`s when their stem changes',
-            function () {
-                var index;
-
-                index = -1;
-
-                tree.visit(tree.WORD_NODE, function (node) {
-                    var stemmedPhonetics;
-
-                    index++;
-
-                    node.replaceContent(words[index]);
-
-                    stemmedPhonetics = node.data.stemmedPhonetics;
-
-                    assert(
-                        stemmedPhonetics[0] ===
-                        stemmedOtherPhonetics[index][0]
-                    );
-
-                    assert(
-                        stemmedPhonetics[1] ===
-                        stemmedOtherPhonetics[index][1]
-                    );
-                });
-            }
-        );
     });
 });

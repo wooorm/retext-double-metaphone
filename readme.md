@@ -1,4 +1,4 @@
-# retext-double-metaphone [![Build Status](https://img.shields.io/travis/wooorm/retext-double-metaphone.svg)](https://travis-ci.org/wooorm/retext-double-metaphone) [![Coverage Status](https://img.shields.io/codecov/c/github/wooorm/retext-double-metaphone.svg)](https://codecov.io/github/wooorm/retext-double-metaphone?branch=master)
+# retext-double-metaphone [![Build Status](https://img.shields.io/travis/wooorm/retext-double-metaphone.svg)](https://travis-ci.org/wooorm/retext-double-metaphone) [![Coverage Status](https://img.shields.io/codecov/c/github/wooorm/retext-double-metaphone.svg)](https://codecov.io/github/wooorm/retext-double-metaphone)
 
 [**Retext**](https://github.com/wooorm/retext) implementation of the
 [Double Metaphone](http://en.wikipedia.org/wiki/metaphone) algorithm.

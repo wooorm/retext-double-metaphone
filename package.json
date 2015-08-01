@@ -1,6 +1,6 @@
 {
   "name": "retext-double-metaphone",
-  "version": "0.1.7",
+  "version": "1.0.0",
   "description": "Retext implementation of the Double Metaphone algorithm",
   "license": "MIT",
   "keywords": [

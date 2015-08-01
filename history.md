@@ -4,6 +4,11 @@
 
 <!--lint disable maximum-line-length-->
 
+1.0.0 / 2015-08-01
+==================
+
+*   Refactor api, purpose, for retext@1.0.0 ([e11fc30](https://github.com/wooorm/retext-double-metaphone/commit/e11fc30))
+
 0.1.7 / 2015-01-19
 ==================
 

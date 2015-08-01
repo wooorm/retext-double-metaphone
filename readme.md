@@ -64,7 +64,7 @@ retext().use(stemmer).use(doubleMetaphone).use(function () {
     return function (cst) {
         console.log(inspect(cst));
     };
-}).process('A simple English sentence.');
+}).process('A detestable paragraph.');
 ```
 
 Yields:

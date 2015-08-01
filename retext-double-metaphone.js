@@ -3,8 +3,8 @@
  * @author Titus Wormer
  * @copyright 2014-2015 Titus Wormer
  * @license MIT
- * @module retext:metaphone
- * @fileoverview Retext implementation of the Metaphone algorithm.
+ * @module retext:double-metaphone
+ * @fileoverview Retext implementation of the Double Metaphone algorithm.
  */
 
 'use strict';
@@ -39,7 +39,7 @@ function patch(node) {
 }
 
 /**
- * Patch `stem` on each node.
+ * Transformer.
  *
  * @param {NLCSTNode} cst - Syntax tree.
  */
@@ -48,7 +48,7 @@ function transformer(cst) {
 }
 
 /**
- * Define `metaphone`.
+ * Attacher.
  *
  * @return {Function} - `transformer`.
  */
@@ -57,7 +57,7 @@ function attacher() {
 }
 
 /*
- * Expose `metaphone`.
+ * Expose.
  */
 
 module.exports = attacher;
